@@ -11,7 +11,7 @@ export class SleepService {
 
   private days$ = new BehaviorSubject<SleepDay[]>(this.load());
 
-  /** Observable для подписки компонентов */
+  /** Подписка для компонентов */
   getDays() {
     return this.days$.asObservable();
   }
@@ -44,10 +44,11 @@ export class SleepService {
     this.save(this.days$.value.filter(d => d.date !== date));
   }
 
-  /** Очистить всё */
+  /** Очистить все данные */
   clear(): void {
     this.save([]);
   }
+
 
 
   private save(days: SleepDay[]): void {
