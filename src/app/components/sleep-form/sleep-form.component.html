@@ -1,0 +1,68 @@
+<h2>Добавить сон</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Дата</mat-label>
+    <input matInput type="date" formControlName="date">
+  </mat-form-field>
+
+  <div formArrayName="intervals" class="intervals">
+    <h3>Интервалы сна</h3>
+
+    <div
+      *ngFor="let interval of intervals.controls; let i = index"
+      [formGroupName]="i"
+      class="interval"
+    >
+      <mat-form-field appearance="outline">
+        <mat-label>Начало</mat-label>
+        <input matInput type="time" formControlName="start">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Конец</mat-label>
+        <input matInput type="time" formControlName="end">
+      </mat-form-field>
+
+      <button
+        mat-icon-button
+        color="warn"
+        type="button"
+        (click)="removeInterval(i)"
+        *ngIf="intervals.length > 1"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+
+    <button mat-button type="button" (click)="addInterval()">
+      + Добавить интервал
+    </button>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Кофеин</mat-label>
+    <input matInput type="number" formControlName="caffeine">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Шаги</mat-label>
+    <input matInput type="number" formControlName="steps">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Сонная инерция (0–5)</mat-label>
+    <input matInput type="number" formControlName="inertia">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Примечание</mat-label>
+    <textarea matInput rows="3" formControlName="note"></textarea>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit">
+    Сохранить
+  </button>
+
+</form>

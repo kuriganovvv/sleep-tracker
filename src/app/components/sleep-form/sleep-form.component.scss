@@ -1,0 +1,17 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.intervals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.interval {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
