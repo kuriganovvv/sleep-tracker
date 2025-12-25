@@ -1,0 +1,70 @@
+<h2>Лог сна</h2>
+
+<table mat-table [dataSource]="days$ | async" class="sleep-table">
+
+  <!-- Дата -->
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef> День </th>
+    <td mat-cell *matCellDef="let day">
+      {{ day.date }}
+    </td>
+  </ng-container>
+
+  <!-- Кофеин -->
+  <ng-container matColumnDef="caffeine">
+    <th mat-header-cell *matHeaderCellDef> Кофеин </th>
+    <td mat-cell *matCellDef="let day">
+      {{ day.caffeine }}
+    </td>
+  </ng-container>
+
+  <!-- Шаги -->
+  <ng-container matColumnDef="steps">
+    <th mat-header-cell *matHeaderCellDef> Шаги </th>
+    <td mat-cell *matCellDef="let day">
+      {{ day.steps }}
+    </td>
+  </ng-container>
+
+  <!-- Сон -->
+  <ng-container matColumnDef="sleep">
+    <th mat-header-cell *matHeaderCellDef> Сон </th>
+    <td mat-cell *matCellDef="let day">
+      {{ getTotalSleepMinutes(day) }} мин
+    </td>
+  </ng-container>
+
+  <!-- Инерция -->
+  <ng-container matColumnDef="inertia">
+    <th mat-header-cell *matHeaderCellDef> Инерция </th>
+    <td mat-cell *matCellDef="let day">
+      {{ day.inertia }}
+    </td>
+  </ng-container>
+
+  <!-- Примечание -->
+  <ng-container matColumnDef="note">
+    <th mat-header-cell *matHeaderCellDef> Примечание </th>
+    <td mat-cell *matCellDef="let day">
+      {{ day.note || '—' }}
+    </td>
+  </ng-container>
+
+  <!-- Действия -->
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef></th>
+    <td mat-cell *matCellDef="let day">
+      <button
+        mat-icon-button
+        color="warn"
+        (click)="remove(day.date)"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+</table>
