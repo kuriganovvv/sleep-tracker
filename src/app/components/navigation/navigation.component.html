@@ -1,0 +1,20 @@
+<mat-toolbar color="primary" class="nav-toolbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <mat-icon class="brand-icon">bed</mat-icon>
+      <span class="brand-text">Sleep Tracker</span>
+    </div>
+    
+    <div class="nav-links">
+      <button mat-button routerLink="/" routerLinkActive="active" class="nav-link">
+        <mat-icon>list</mat-icon>
+        <span>Лог сна</span>
+      </button>
+      
+      <button mat-button routerLink="/sleep" routerLinkActive="active" class="nav-link sleep-mode-btn">
+        <mat-icon>dark_mode</mat-icon>
+        <span>Режим сна</span>
+      </button>
+    </div>
+  </div>
+</mat-toolbar>

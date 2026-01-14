@@ -1,0 +1,133 @@
+body {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+  min-width: 1024px;
+  overflow-x: auto;
+}
+.mat-mdc-menu-panel {
+  background: rgba(30, 41, 59, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important;
+  min-width: 180px !important;
+}
+
+.mat-mdc-menu-content {
+  padding: 8px 0 !important;
+}
+
+.mat-mdc-menu-item {
+  color: #e2e8f0 !important;
+  font-size: 14px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  padding: 0 16px !important;
+  background: transparent !important;
+  
+  &:hover {
+    background: rgba(99, 102, 241, 0.15) !important;
+  }
+  
+  .mat-icon {
+    color: #94a3b8 !important;
+    margin-right: 12px !important;
+    font-size: 20px !important;
+    height: 20px !important;
+    width: 20px !important;
+  }
+  
+  .mdc-list-item__primary-text {
+    color: inherit !important;
+  }
+}
+
+.mat-mdc-menu-item[disabled] {
+  color: #64748b !important;
+  opacity: 0.5 !important;
+  
+  .mat-icon {
+    color: #64748b !important;
+  }
+}
+// Стили для Snackbar в теме приложения
+.mat-mdc-snack-bar-container.app-theme {
+  --mdc-snackbar-container-color: rgba(30, 41, 59, 0.98) !important;
+  --mdc-snackbar-supporting-text-color: #e2e8f0 !important;
+  --mat-snack-bar-button-color: #8b5cf6 !important;
+  
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  padding: 0 !important;
+  margin: 12px !important;
+}
+
+.app-theme .mdc-snackbar__surface {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  min-width: 300px !important;
+}
+
+.app-theme .mat-mdc-snack-bar-label {
+  color: #e2e8f0 !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  padding: 16px 20px !important;
+}
+
+// КЛЮЧЕВОЕ: стили для кнопки закрытия как у ваших кнопок
+.app-theme .mdc-button {
+  color: #8b5cf6 !important;
+  background: transparent !important; /* Прозрачный фон по умолчанию */
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease !important; /* Только фон */
+  margin: 8px 12px !important;
+  min-width: 60px !important;
+  padding: 6px 12px !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 20px !important;
+  border: none !important; /* Убираем границу */
+  box-shadow: none !important; /* Убираем тень */
+  
+  /* Убираем все стандартные эффекты Material */
+  &::before, &::after {
+    display: none !important;
+  }
+  
+  &:hover, &:focus {
+    background: rgba(139, 92, 246, 0.15) !important; /* ТОЛЬКО фон меняется */
+    color: #8b5cf6 !important; /* Цвет текста не меняется */
+    transform: none !important; /* Нет смещения */
+    box-shadow: none !important; /* Нет тени */
+  }
+  
+  &:active {
+    background: rgba(139, 92, 246, 0.2) !important; /* Чуть темнее при клике */
+  }
+}
+
+.app-theme .mdc-button__label {
+  color: inherit !important;
+}
+.mdc-snackbar__actions .mdc-button {
+  &::before, &::after {
+    background-color: transparent !important;
+  }
+  
+  .mdc-button__ripple::before, .mdc-button__ripple::after {
+    background-color: transparent !important;
+  }
+  
+  &:hover .mdc-button__ripple::before {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+  }
+}

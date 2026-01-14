@@ -1,70 +1,206 @@
-<h2>Лог сна</h2>
-
-<table mat-table [dataSource]="days$ | async" class="sleep-table">
-
-  <!-- Дата -->
-  <ng-container matColumnDef="date">
-    <th mat-header-cell *matHeaderCellDef> День </th>
-    <td mat-cell *matCellDef="let day">
-      {{ day.date }}
-    </td>
-  </ng-container>
-
-  <!-- Кофеин -->
-  <ng-container matColumnDef="caffeine">
-    <th mat-header-cell *matHeaderCellDef> Кофеин </th>
-    <td mat-cell *matCellDef="let day">
-      {{ day.caffeine }}
-    </td>
-  </ng-container>
-
-  <!-- Шаги -->
-  <ng-container matColumnDef="steps">
-    <th mat-header-cell *matHeaderCellDef> Шаги </th>
-    <td mat-cell *matCellDef="let day">
-      {{ day.steps }}
-    </td>
-  </ng-container>
-
-  <!-- Сон -->
-  <ng-container matColumnDef="sleep">
-    <th mat-header-cell *matHeaderCellDef> Сон </th>
-    <td mat-cell *matCellDef="let day">
-      {{ getTotalSleepMinutes(day) }} мин
-    </td>
-  </ng-container>
-
-  <!-- Инерция -->
-  <ng-container matColumnDef="inertia">
-    <th mat-header-cell *matHeaderCellDef> Инерция </th>
-    <td mat-cell *matCellDef="let day">
-      {{ day.inertia }}
-    </td>
-  </ng-container>
-
-  <!-- Примечание -->
-  <ng-container matColumnDef="note">
-    <th mat-header-cell *matHeaderCellDef> Примечание </th>
-    <td mat-cell *matCellDef="let day">
-      {{ day.note || '—' }}
-    </td>
-  </ng-container>
-
-  <!-- Действия -->
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef></th>
-    <td mat-cell *matCellDef="let day">
-      <button
-        mat-icon-button
-        color="warn"
-        (click)="remove(day.date)"
-      >
-        <mat-icon>delete</mat-icon>
+<div class="sleep-log">
+  <div class="header">
+    <div class="month-navigation">
+      <button mat-icon-button (click)="previousMonth()" class="nav-btn">
+        <mat-icon>chevron_left</mat-icon>
       </button>
-    </td>
-  </ng-container>
+      <div class="month-display">
+        <span class="month-name">{{ currentMonthName }} {{ currentYear }}</span>
+      </div>
+      <button mat-icon-button (click)="nextMonth()" class="nav-btn">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <button mat-raised-button color="primary" (click)="openAddSleepForm()" class="add-day-btn">
+      <mat-icon>add</mat-icon>
+      Добавить день
+    </button>
+  </div>
 
-</table>
+  <div class="add-sleep-overlay" *ngIf="showAddSleepForm" (click)="closeAddSleepForm()">
+    <div class="add-sleep-container" (click)="$event.stopPropagation()">
+      <div class="overlay-header">
+        <h3>Добавить запись сна</h3>
+        <button mat-icon-button (click)="closeAddSleepForm()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div class="overlay-content">
+        <app-sleep-form 
+          (saved)="onSleepSaved()"
+          (canceled)="closeAddSleepForm()">
+        </app-sleep-form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="stats" *ngIf="filteredDays.length > 0">
+    <span class="stat-item">
+      <span class="stat-number">{{ filteredDays.length }}</span>
+      <span class="stat-label">дней</span>
+    </span>
+    <span class="stat-item">
+      <span class="stat-number">{{ avgSleepHours | number:'1.1-1' }}</span>
+      <span class="stat-label">часов сна</span>
+    </span>
+    <span class="stat-item">
+      <span class="stat-number">{{ avgQuality | number:'1.1-1' }}</span>
+      <span class="stat-label">оценка</span>
+    </span>
+  </div>
+
+  <div class="table-container">
+    <table class="sleep-table" *ngIf="filteredDays.length > 0">
+      <thead>
+        <tr>
+          <th class="col-date">День</th>
+          <th class="col-sleep">Сон</th>
+          <th class="col-quality">Оценка</th>
+          <th class="col-note">Примечание</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let day of filteredDays; let i = index" 
+            class="sleep-row"
+            [class.editing]="editingIndex === i">
+          
+          <td class="col-date">
+            <span class="date-compact">{{ getDayNumber(day.date) }} {{ getDayOfWeek(day.date) }}</span>
+          </td>
+          
+          <td class="col-sleep">
+            <div class="sleep-content" *ngIf="editingIndex !== i">
+              <div class="sleep-display">
+                <span class="sleep-time">
+                  {{ getCombinedSleepTime(day.date) }}
+                </span>
+              </div>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-intervals">
+              <div *ngFor="let interval of editIntervals; let j = index" class="edit-interval">
+                <div class="time-input-wrapper">
+                  <input type="time" 
+                         [(ngModel)]="editIntervals[j].start" 
+                         class="time-input"
+                         placeholder="ЧЧ:ММ">
+                  <mat-icon class="time-icon">schedule</mat-icon>
+                </div>
+                
+                <span class="time-separator">—</span>
+                
+                <div class="time-input-wrapper">
+                  <input type="time" 
+                         [(ngModel)]="editIntervals[j].end" 
+                         class="time-input"
+                         placeholder="ЧЧ:ММ">
+                  <mat-icon class="time-icon">schedule</mat-icon>
+                </div>
+                
+                <div class="duration-group">
+                  <span class="interval-duration" *ngIf="editIntervals[j].start && editIntervals[j].end">
+                    {{ calculateDuration(editIntervals[j]) }}
+                  </span>
+                  <div class="duration-label">всего</div>
+                </div>
+                
+                <button mat-icon-button type="button" (click)="removeEditInterval(j)" 
+                        *ngIf="editIntervals.length > 1" class="remove-interval-btn">
+                  <mat-icon>remove</mat-icon>
+                </button>
+              </div>
+              
+              <button mat-button type="button" (click)="addEditInterval()" class="add-interval-btn">
+                <mat-icon>add</mat-icon> Еще интервал
+              </button>
+            </div>
+          </td>
+          
+          <td class="col-quality">
+            <div *ngIf="editingIndex !== i" class="quality-content">
+              <span class="stars-compact">
+                <span *ngFor="let star of [1,2,3,4,5]">
+                  {{ star <= (day.quality || 0) ? '★' : '☆' }}
+                </span>
+              </span>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-stars">
+              <button mat-icon-button *ngFor="let star of [1,2,3,4,5]" 
+                      (click)="editQuality = star" class="star-btn">
+                <mat-icon>{{ star <= editQuality ? 'star' : 'star_border' }}</mat-icon>
+              </button>
+            </div>
+          </td>
+          
+          <td class="col-note">
+            <div *ngIf="editingIndex !== i" class="note-content">
+              <span class="note-text" [title]="day.note || ''">
+                {{ day.note || '—' }}
+              </span>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-note">
+              <textarea [(ngModel)]="editNote" 
+                        class="note-edit" 
+                        placeholder="Примечание (необязательно)" 
+                        rows="1"
+                        (keydown.escape)="cancelEdit()"></textarea>
+            </div>
+          </td>
+          
+          <td class="col-actions">
+            <div *ngIf="editingIndex !== i" class="menu-container">
+              <button mat-icon-button 
+                      [matMenuTriggerFor]="menu" 
+                      class="menu-btn"
+                      (click)="$event.stopPropagation()">
+                <mat-icon class="menu-icon">more_vert</mat-icon>
+              </button>
+              
+              <mat-menu #menu="matMenu" class="custom-menu">
+                <button mat-menu-item (click)="startEdit(i, day)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Редактировать</span>
+                </button>
+                <button mat-menu-item (click)="deleteDay(day.date)" class="delete-item">
+                  <mat-icon>delete</mat-icon>
+                  <span>Удалить</span>
+                </button>
+              </mat-menu>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-buttons">
+              <button mat-button 
+                      (click)="saveEdit()" 
+                      class="save-btn"
+                      [disabled]="!canSaveEdit()"
+                      matTooltip="Сохранить изменения">
+                Готово
+              </button>
+              <button mat-button 
+                      (click)="cancelEdit()" 
+                      class="cancel-btn"
+                      matTooltip="Отменить редактирование">
+                Отмена
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredDays.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">bed</mat-icon>
+      <h3>Нет записей за {{ currentMonthName | lowercase }} {{ currentYear }}</h3>
+      <button mat-raised-button color="primary" (click)="openAddSleepForm()">
+        <mat-icon>add</mat-icon>
+        Добавить первую запись
+      </button>
+    </div>
+  </div>
+
+</div>

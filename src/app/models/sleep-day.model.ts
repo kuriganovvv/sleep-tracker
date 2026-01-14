@@ -1,11 +1,13 @@
 import { SleepInterval } from './sleep-interval.model';
 
 export interface SleepDay {
-  date: string; // ГГГГ-ММ-ДД
+  date: string;           // '2024-12-25'
   intervals: SleepInterval[];
-
-  caffeine: number;
-  steps: number;
-  inertia: number; 
+  quality: number;        // 1-5 звезд
   note?: string;
+  totalDuration?: string;
+
+  caffeine?: number;      // чашки кофе
+  steps?: number;         // количество шагов
+  inertia?: number;       // сонная инерция 0-5
 }

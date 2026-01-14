@@ -1,4 +1,4 @@
 export interface SleepInterval {
-  start: string; 
-  end: string;   
+  start: string;  // '23:30'
+  end: string;    // '07:30'
 }

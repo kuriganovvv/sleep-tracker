@@ -1,0 +1,51 @@
+<div class="sleep-mode-container">
+  <!-- Кнопки управления -->
+  <div class="controls">
+    <button mat-icon-button class="fullscreen-btn" (click)="toggleFullscreen()">
+      <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+    </button>
+    
+    <button mat-icon-button class="exit-btn" routerLink="/">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <!-- Основной контейнер -->
+  <div class="fullscreen-content" #fullscreenContent>
+    <!-- Звезды -->
+    <div class="stars">
+      <div *ngFor="let star of stars" 
+           class="star"
+           [style.top]="star.top"
+           [style.left]="star.left"
+           [style.width]="star.size"
+           [style.height]="star.size"
+           [style.animation-duration]="star.duration">
+      </div>
+    </div>
+    
+    <!-- Часы -->
+    <div class="clock-container">
+      <div class="clock" [innerHTML]="currentTime"></div>
+      <div class="date-display">{{ currentDate }}</div>
+    </div>
+    
+    <!-- ВРЕМЯ ВОСХОДА И ЗАКАТА -->
+    <div class="sun-times" *ngIf="sunrise && sunset">
+      <div class="sun-time-item">
+        <mat-icon class="sunrise-icon">wb_twilight</mat-icon>
+        <span class="sun-time-text">Рассвет: {{ sunrise }}</span>
+      </div>
+      <div class="sun-time-item">
+        <mat-icon class="sunset-icon">nightlight</mat-icon>
+        <span class="sun-time-text">Закат: {{ sunset }}</span>
+      </div>
+    </div>
+    
+    <!-- Подсказка -->
+    <p class="hint">Этот режим предназначен для подготовки ко сну.<br>Приглушите свет и расслабьтесь.</p>
+    
+    <!-- Дополнительная подсказка -->
+    <p class="sleep-tip">Совет: Дышите глубоко и медленно для быстрого засыпания</p>
+  </div>
+</div>

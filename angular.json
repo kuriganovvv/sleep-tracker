@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "movie-search-app": {
+    "sleep-tracker": { 
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -26,22 +26,21 @@
               }
             ],
             "styles": [
-              "src/styles.css",
-              "src/custom-theme.scss"
+              "src/styles.scss" 
             ]
           },
           "configurations": {
             "production": {
-              "budgets": [
+              "budgets": [ 
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "20kB",
+                  "maximumError": "50kB"
                 }
               ],
               "outputHashing": "all"
@@ -49,7 +48,8 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "budgets": []  
             }
           },
           "defaultConfiguration": "production"
@@ -58,10 +58,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "movie-search-app:build:production"
+              "buildTarget": "sleep-tracker:build:production" 
             },
             "development": {
-              "buildTarget": "movie-search-app:build:development"
+              "buildTarget": "sleep-tracker:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -77,6 +77,7 @@
               "zone.js/testing"
             ],
             "tsConfig": "tsconfig.spec.json",
+            
             "assets": [
               {
                 "glob": "**/*",
@@ -84,8 +85,9 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss" 
             ]
+            
           }
         }
       }

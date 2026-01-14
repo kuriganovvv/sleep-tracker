@@ -1,17 +1,312 @@
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.simple-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.intervals {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.date-section, .time-section, .quality-section, .note-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
 }
 
-.interval {
+h3 {
+  color: #e2e8f0;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.date-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  margin-bottom: 15px;
+  
+  button {
+    flex: 1;
+  }
+  
+  button.active {
+    background: #6366f1;
+    color: white;
+  }
+}
+
+.selected-date {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  text-align: center;
+}
+
+.time-inputs {
+  display: flex;
+  gap: 15px;
+  
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.duration {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1.2em;
+  color: #6366f1;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 10px;
+  
+  button {
+    color: #fbbf24;
+  }
+}
+
+.quality-text {
+  text-align: center;
+  font-size: 1.1em;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  
+  button:first-child {
+    min-width: 150px;
+  }
+}
+// Добавьте эти стили в существующий файл
+.intervals-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.intervals-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 15px;
+}
+
+.intervals-header h3 {
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.add-interval-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6366f1 !important;
+}
+
+.intervals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.interval-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.interval-number {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6366f1;
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.interval-row mat-form-field {
+  flex: 1;
+}
+
+.interval-duration {
+  min-width: 70px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.delete-interval-btn {
+  color: #ef4444 !important;
+  opacity: 0.7;
+}
+
+.delete-interval-btn:hover {
+  opacity: 1;
+}
+
+.total-sleep {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6366f1;
+  font-weight: 600;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+// src/app/components/sleep-log/sleep-log.component.scss
+// Добавить в конец файла или в соответствующее место
+
+// АККОРДЕОН ДЛЯ ФОРМЫ ДОБАВЛЕНИЯ
+.add-form-accordion {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(15, 23, 42, 0.7);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+// Заголовок аккордеона
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(99, 102, 241, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  
+  &:hover {
+    background: rgba(99, 102, 241, 0.15);
+  }
+  
+  &.expanded {
+    background: rgba(99, 102, 241, 0.2);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  }
+}
+
+.accordion-icon {
+  color: #6366f1;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+  transition: transform 0.3s ease;
+  
+  .expanded & {
+    transform: rotate(180deg);
+  }
+}
+
+.accordion-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  flex: 1;
+}
+
+.accordion-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+// Контент аккордеона (форма)
+.accordion-content {
+  padding: 25px;
+  background: rgba(30, 41, 59, 0.9);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+}
+
+// Адаптация формы для аккордеона
+.simple-form {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  
+  h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+  }
+}
+
+// Кнопки формы внутри аккордеона
+.buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  button:first-child {
+    min-width: 180px;
+  }
+  
+  button[mat-raised-button] {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    
+    &:hover:not([disabled]) {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    
+    &[disabled] {
+      opacity: 0.5;
+      background: #475569;
+    }
+  }
+}
+
+// Анимация для плавного раскрытия
+.add-form-accordion {
+  .accordion-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
 }

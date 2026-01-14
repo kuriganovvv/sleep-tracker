@@ -1,68 +1,104 @@
-<h2>Добавить сон</h2>
-
-<form [formGroup]="form" (ngSubmit)="submit()">
-
-  <mat-form-field appearance="outline">
-    <mat-label>Дата</mat-label>
-    <input matInput type="date" formControlName="date">
-  </mat-form-field>
-
-  <div formArrayName="intervals" class="intervals">
-    <h3>Интервалы сна</h3>
-
-    <div
-      *ngFor="let interval of intervals.controls; let i = index"
-      [formGroupName]="i"
-      class="interval"
-    >
-      <mat-form-field appearance="outline">
-        <mat-label>Начало</mat-label>
-        <input matInput type="time" formControlName="start">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Конец</mat-label>
-        <input matInput type="time" formControlName="end">
-      </mat-form-field>
-
-      <button
-        mat-icon-button
-        color="warn"
-        type="button"
-        (click)="removeInterval(i)"
-        *ngIf="intervals.length > 1"
-      >
-        <mat-icon>delete</mat-icon>
+<div class="simple-form">
+  
+  <!-- 1. Выбор даты -->
+  <div class="date-section">
+    <h3>📅 Когда спали?</h3>
+    <div class="date-buttons">
+      <button mat-stroked-button (click)="selectDate('today')" 
+              [class.active]="selectedDate === 'today'">
+        Сегодня
+      </button>
+      <button mat-stroked-button (click)="selectDate('yesterday')"
+              [class.active]="selectedDate === 'yesterday'">
+        Вчера
+      </button>
+      <button mat-stroked-button (click)="showDatePicker = true">
+        Другая дата
       </button>
     </div>
-
-    <button mat-button type="button" (click)="addInterval()">
-      + Добавить интервал
-    </button>
+    
+    <mat-form-field *ngIf="showDatePicker">
+      <mat-label>Выберите дату</mat-label>
+      <input matInput [matDatepicker]="picker" (dateChange)="onDateChange($event)">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    
+    <div class="selected-date">
+      <strong>Дата сна:</strong> {{ getDisplayDateWithCorrectNight() }}
+    </div>
   </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Кофеин</mat-label>
-    <input matInput type="number" formControlName="caffeine">
-  </mat-form-field>
+  <!-- 2. Промежутки сна -->
+  <div class="intervals-section">
+    <div class="intervals-header">
+      <h3>⏰ Промежутки сна</h3>
+      <button mat-button type="button" (click)="addInterval()" class="add-interval-btn">
+        <mat-icon>add</mat-icon>
+        Добавить промежуток
+      </button>
+    </div>
+    
+    <div class="intervals-list">
+      <div *ngFor="let interval of intervals; let i = index" class="interval-row">
+        <div class="interval-number">{{ i + 1 }}</div>
+        
+        <mat-form-field>
+          <mat-label>Начало</mat-label>
+          <input matInput type="time" [(ngModel)]="interval.start" 
+                 (ngModelChange)="calculateTotalSleep()">
+        </mat-form-field>
+        
+        <mat-form-field>
+          <mat-label>Конец</mat-label>
+          <input matInput type="time" [(ngModel)]="interval.end"
+                 (ngModelChange)="calculateTotalSleep()">
+        </mat-form-field>
+        
+        <div class="interval-duration">
+          {{ getIntervalDuration(interval) || '—' }}
+        </div>
+        
+        <button mat-icon-button type="button" (click)="removeInterval(i)" 
+                *ngIf="intervals.length > 1" class="delete-interval-btn">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <div class="total-sleep" *ngIf="totalSleep">
+      💤 Общее время сна: {{ totalSleep }}
+    </div>
+  </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Шаги</mat-label>
-    <input matInput type="number" formControlName="steps">
-  </mat-form-field>
+  <!-- 3. Оценка качества -->
+  <div class="quality-section">
+    <h3>⭐ Как спалось?</h3>
+    <div class="stars">
+      <button mat-icon-button *ngFor="let star of [1,2,3,4,5]" 
+              (click)="quality = star">
+        <mat-icon>{{ star <= quality ? 'star' : 'star_border' }}</mat-icon>
+      </button>
+    </div>
+    <div class="quality-text">{{ getQualityText() }}</div>
+  </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Сонная инерция (0–5)</mat-label>
-    <input matInput type="number" formControlName="inertia">
-  </mat-form-field>
+  <!-- 4. Заметка -->
+  <div class="note-section">
+    <h3>📝 Заметка (необязательно)</h3>
+    <textarea matInput [(ngModel)]="note" 
+              placeholder="Что влияло на сон? Стресс, тренировка, лекарства..."
+              rows="2"></textarea>
+  </div>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Примечание</mat-label>
-    <textarea matInput rows="3" formControlName="note"></textarea>
-  </mat-form-field>
-
-  <button mat-raised-button color="primary" type="submit">
-    Сохранить
-  </button>
-
-</form>
+  <!-- 5. Кнопки -->
+  <div class="buttons">
+    <button mat-raised-button color="primary" (click)="saveSleep()"
+            [disabled]="!canSave()">
+      💾 Сохранить запись
+    </button>
+    <button mat-button (click)="cancelForm()" type="button">
+      ✕ Закрыть
+    </button>
+  </div>
+</div>
