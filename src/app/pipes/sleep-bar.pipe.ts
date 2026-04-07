@@ -5,7 +5,8 @@ import { SleepInterval } from '../models/sleep-interval.model';
 
 @Pipe({
   name: 'sleepBar',
-  standalone: true
+  standalone: true,
+  pure:false
 })
 export class SleepBarPipe implements PipeTransform {
   transform(day: SleepDay): string {
@@ -13,15 +14,12 @@ export class SleepBarPipe implements PipeTransform {
       return '—';
     }
 
-    // Создаем массив из 24 часов, все false изначально
     const hours = new Array(24).fill(false);
     
-    // Заполняем часы, когда был сон
     for (const interval of day.intervals) {
       this.markSleepHours(hours, interval);
     }
     
-    // Преобразуем в строку с символами
     let result = '|';
     for (let i = 0; i < 24; i++) {
       result += hours[i] ? '▰' : '▱';
@@ -37,27 +35,21 @@ export class SleepBarPipe implements PipeTransform {
     
     if (start === null || end === null) return;
     
-    // Для интервала "00:00" - "23:59" отмечаем все часы
     if (interval.start === '00:00' && interval.end === '23:59') {
       for (let i = 0; i < 24; i++) hours[i] = true;
       return;
     }
     
-    // Обрабатываем сон, который может переходить через полночь
     if (end > start) {
-      // Обычный случай: сон в пределах одних суток
       for (let minute = start; minute < end; minute++) {
         const hour = Math.floor(minute / 60) % 24;
         hours[hour] = true;
       }
     } else {
-      // Сон через полночь (например, 23:00 - 07:00)
-      // Первая часть: от start до конца суток (1440 минут)
       for (let minute = start; minute < 1440; minute++) {
         const hour = Math.floor(minute / 60) % 24;
         hours[hour] = true;
       }
-      // Вторая часть: от начала суток до end
       for (let minute = 0; minute < end; minute++) {
         const hour = Math.floor(minute / 60) % 24;
         hours[hour] = true;
@@ -75,7 +67,6 @@ export class SleepBarPipe implements PipeTransform {
     
     if (isNaN(hours) || isNaN(minutes)) return null;
     
-    // Нормализуем часы (0-23)
     const normalizedHours = ((hours % 24) + 24) % 24;
     return normalizedHours * 60 + minutes;
   }

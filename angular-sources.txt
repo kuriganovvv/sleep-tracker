@@ -1,0 +1,4119 @@
+================================================================================
+FILE: ./src/app/app.config.ts
+================================================================================
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';  
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { routes } from './app.routes';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideHttpClient(withInterceptorsFromDi()),
+    provideAnimations(),
+    provideAnimationsAsync(), 
+  ]
+};
+
+export const appTestConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClientTesting(),
+    provideAnimations(),
+    provideAnimationsAsync(),
+  ]
+};
+
+
+================================================================================
+FILE: ./src/app/app.html
+================================================================================
+<main class="main">
+  <app-navigation></app-navigation>
+  <section class="content-wrapper">
+    <router-outlet></router-outlet>
+  </section>
+</main>
+
+
+================================================================================
+FILE: ./src/app/app.routes.ts
+================================================================================
+import { Routes } from '@angular/router';
+import { SleepFormComponent } from './components/sleep-form/sleep-form.component';
+import { SleepLogComponent } from './components/sleep-log/sleep-log.component';
+import { SleepModeComponent } from './components/sleep-mode/sleep-mode.component';
+
+export const routes: Routes = [
+  { path: '', component: SleepLogComponent },
+  { path: 'sleep', component: SleepModeComponent },
+  { path: '**', redirectTo: '' }
+];
+
+
+================================================================================
+FILE: ./src/app/app.scss
+================================================================================
+// src/app/app.scss
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #e2e8f0;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  z-index: 0;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 1000px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 70vh;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+================================================================================
+FILE: ./src/app/app.spec.ts
+================================================================================
+import { TestBed } from '@angular/core/testing';
+import { App } from './app';
+import { MatIconModule } from '@angular/material/icon';
+
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App,MatIconModule],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it('should render title', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, movie-search-app');
+  });
+});
+
+
+================================================================================
+FILE: ./src/app/app.ts
+================================================================================
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { NavigationComponent } from './components/navigation/navigation.component';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet, CommonModule,NavigationComponent],
+  templateUrl: './app.html',
+  styleUrls: ['./app.scss']
+})
+export class App {
+}
+
+
+================================================================================
+FILE: ./src/app/components/navigation/navigation.component.html
+================================================================================
+<mat-toolbar color="primary" class="nav-toolbar">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <mat-icon class="brand-icon">bed</mat-icon>
+      <span class="brand-text">Sleep Tracker</span>
+    </div>
+    
+    <div class="nav-links">
+      <button mat-button routerLink="/" routerLinkActive="active" class="nav-link">
+        <mat-icon>list</mat-icon>
+        <span>Лог сна</span>
+      </button>
+      
+      <button mat-button routerLink="/sleep" routerLinkActive="active" class="nav-link sleep-mode-btn">
+        <mat-icon>dark_mode</mat-icon>
+        <span>Режим сна</span>
+      </button>
+    </div>
+  </div>
+</mat-toolbar>
+
+
+================================================================================
+FILE: ./src/app/components/navigation/navigation.component.scss
+================================================================================
+.nav-toolbar {
+  padding: 0 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  font-size: 28px;
+  height: 28px;
+  width: 28px;
+}
+
+.brand-text {
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 48px;
+  border-radius: 24px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  font-weight: 500;
+}
+
+.sleep-mode-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+}
+
+.sleep-mode-btn:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+
+================================================================================
+FILE: ./src/app/components/navigation/navigation.component.ts
+================================================================================
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
+@Component({
+  selector: 'app-navigation',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule
+  ],
+  templateUrl: './navigation.component.html', 
+  styleUrls: ['./navigation.component.scss']
+})
+export class NavigationComponent {}
+
+
+================================================================================
+FILE: ./src/app/components/sleep-form/sleep-form.component.html
+================================================================================
+<div class="simple-form">
+  
+  <!-- 1. Выбор даты -->
+  <div class="date-section">
+    <h3>📅 Когда спали?</h3>
+    <div class="date-buttons">
+      <button mat-stroked-button (click)="selectDate('today')" 
+              [class.active]="selectedDate === 'today'">
+        Сегодня
+      </button>
+      <button mat-stroked-button (click)="selectDate('yesterday')"
+              [class.active]="selectedDate === 'yesterday'">
+        Вчера
+      </button>
+      <button mat-stroked-button (click)="showDatePicker = true">
+        Другая дата
+      </button>
+    </div>
+    
+    <mat-form-field *ngIf="showDatePicker">
+      <mat-label>Выберите дату</mat-label>
+      <input matInput [matDatepicker]="picker" (dateChange)="onDateChange($event)">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    
+    <div class="selected-date">
+      <strong>Дата сна:</strong> {{ getDisplayDateWithCorrectNight() }}
+    </div>
+  </div>
+
+  <!-- 2. Промежутки сна -->
+  <div class="intervals-section">
+    <div class="intervals-header">
+      <h3>⏰ Промежутки сна</h3>
+      <button mat-button type="button" (click)="addInterval()" class="add-interval-btn">
+        <mat-icon>add</mat-icon>
+        Добавить промежуток
+      </button>
+    </div>
+    
+    <div class="intervals-list">
+      <div *ngFor="let interval of intervals; let i = index" class="interval-row">
+        <div class="interval-number">{{ i + 1 }}</div>
+        
+        <mat-form-field>
+          <mat-label>Начало</mat-label>
+          <input matInput type="time" [(ngModel)]="interval.start" 
+                 (ngModelChange)="calculateTotalSleep()">
+        </mat-form-field>
+        
+        <mat-form-field>
+          <mat-label>Конец</mat-label>
+          <input matInput type="time" [(ngModel)]="interval.end"
+                 (ngModelChange)="calculateTotalSleep()">
+        </mat-form-field>
+        
+        <div class="interval-duration">
+          {{ getIntervalDuration(interval) || '—' }}
+        </div>
+        
+        <button mat-icon-button type="button" (click)="removeInterval(i)" 
+                *ngIf="intervals.length > 1" class="delete-interval-btn">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+    <div class="total-sleep" *ngIf="totalSleep">
+      💤 Общее время сна: {{ totalSleep }}
+    </div>
+  </div>
+
+  <!-- 3. Оценка качества -->
+  <div class="quality-section">
+    <h3>⭐ Как спалось?</h3>
+    <div class="stars">
+      <button mat-icon-button *ngFor="let star of [1,2,3,4,5]" 
+              (click)="quality = star">
+        <mat-icon>{{ star <= quality ? 'star' : 'star_border' }}</mat-icon>
+      </button>
+    </div>
+    <div class="quality-text">{{ getQualityText() }}</div>
+  </div>
+
+  <!-- 4. Заметка -->
+  <div class="note-section">
+    <h3>📝 Заметка (необязательно)</h3>
+    <textarea matInput [(ngModel)]="note" 
+              placeholder="Что влияло на сон? Стресс, тренировка, лекарства..."
+              rows="2"></textarea>
+  </div>
+
+  <!-- 5. Кнопки -->
+  <div class="buttons">
+    <button mat-raised-button color="primary" (click)="saveSleep()"
+            [disabled]="!canSave()">
+      💾 Сохранить запись
+    </button>
+    <button mat-button (click)="cancelForm()" type="button">
+      ✕ Закрыть
+    </button>
+  </div>
+</div>
+
+
+================================================================================
+FILE: ./src/app/components/sleep-form/sleep-form.component.scss
+================================================================================
+.simple-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.date-section, .time-section, .quality-section, .note-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+h3 {
+  color: #e2e8f0;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.date-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  
+  button {
+    flex: 1;
+  }
+  
+  button.active {
+    background: #6366f1;
+    color: white;
+  }
+}
+
+.selected-date {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  text-align: center;
+}
+
+.time-inputs {
+  display: flex;
+  gap: 15px;
+  
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.duration {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1.2em;
+  color: #6366f1;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 10px;
+  
+  button {
+    color: #fbbf24;
+  }
+}
+
+.quality-text {
+  text-align: center;
+  font-size: 1.1em;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  
+  button:first-child {
+    min-width: 150px;
+  }
+}
+// Добавьте эти стили в существующий файл
+.intervals-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.intervals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.intervals-header h3 {
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.add-interval-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6366f1 !important;
+}
+
+.intervals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.interval-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.interval-number {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6366f1;
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.interval-row mat-form-field {
+  flex: 1;
+}
+
+.interval-duration {
+  min-width: 70px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.delete-interval-btn {
+  color: #ef4444 !important;
+  opacity: 0.7;
+}
+
+.delete-interval-btn:hover {
+  opacity: 1;
+}
+
+.total-sleep {
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6366f1;
+  font-weight: 600;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+// src/app/components/sleep-log/sleep-log.component.scss
+// Добавить в конец файла или в соответствующее место
+
+// АККОРДЕОН ДЛЯ ФОРМЫ ДОБАВЛЕНИЯ
+.add-form-accordion {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(15, 23, 42, 0.7);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+// Заголовок аккордеона
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(99, 102, 241, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  
+  &:hover {
+    background: rgba(99, 102, 241, 0.15);
+  }
+  
+  &.expanded {
+    background: rgba(99, 102, 241, 0.2);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  }
+}
+
+.accordion-icon {
+  color: #6366f1;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+  transition: transform 0.3s ease;
+  
+  .expanded & {
+    transform: rotate(180deg);
+  }
+}
+
+.accordion-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  flex: 1;
+}
+
+.accordion-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+// Контент аккордеона (форма)
+.accordion-content {
+  padding: 25px;
+  background: rgba(30, 41, 59, 0.9);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+}
+
+// Адаптация формы для аккордеона
+.simple-form {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  
+  h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+  }
+}
+
+// Кнопки формы внутри аккордеона
+.buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  button:first-child {
+    min-width: 180px;
+  }
+  
+  button[mat-raised-button] {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    
+    &:hover:not([disabled]) {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    
+    &[disabled] {
+      opacity: 0.5;
+      background: #475569;
+    }
+  }
+}
+
+// Анимация для плавного раскрытия
+.add-form-accordion {
+  .accordion-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+}
+
+
+================================================================================
+FILE: ./src/app/components/sleep-form/sleep-form.component.spec.ts
+================================================================================
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SleepFormComponent } from './sleep-form.component';
+import { SleepService } from '../../services/sleep.service';
+import { FormsModule } from '@angular/forms';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+describe('SleepFormComponent', () => {
+  let component: SleepFormComponent;
+  let fixture: ComponentFixture<SleepFormComponent>;
+  let sleepServiceSpy: jasmine.SpyObj<SleepService>;
+
+  beforeEach(async () => {
+    const spy = jasmine.createSpyObj('SleepService', ['saveDay']);
+    
+    await TestBed.configureTestingModule({
+      imports: [
+        SleepFormComponent,
+        FormsModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        NoopAnimationsModule
+      ],
+      providers: [
+        { provide: SleepService, useValue: spy }
+      ]
+    }).compileComponents();
+
+    sleepServiceSpy = TestBed.inject(SleepService) as jasmine.SpyObj<SleepService>;
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(SleepFormComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('должен создаваться', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('должен инициализироваться с дефолтными значениями', () => {
+    expect(component.selectedDate).toBe('today');
+    expect(component.intervals.length).toBe(1);
+    expect(component.quality).toBe(3);
+    expect(component.note).toBe('');
+  });
+
+  it('должен добавлять интервал сна', () => {
+    const initialCount = component.intervals.length;
+    component.addInterval();
+    
+    expect(component.intervals.length).toBe(initialCount + 1);
+  });
+
+  it('должен удалять интервал сна', () => {
+    component.addInterval();
+    const initialCount = component.intervals.length;
+    
+    component.removeInterval(1);
+    
+    expect(component.intervals.length).toBe(initialCount - 1);
+  });
+
+  it('должен рассчитывать длительность интервала', () => {
+    const interval = { start: '22:00', end: '07:00' };
+    const duration = component.getIntervalDuration(interval);
+    
+    expect(duration).toBe('9ч');
+  });
+
+  it('должен рассчитывать общее время сна', () => {
+    component.intervals = [
+      { start: '22:00', end: '07:00' },
+      { start: '14:00', end: '15:00' }
+    ];
+    
+    component.calculateTotalSleep();
+    
+    expect(component.totalSleep).toBe('10ч');
+  });
+
+  it('должен проверять возможность сохранения', () => {
+    component.intervals = [{ start: '', end: '' }];
+    expect(component.canSave()).toBeFalse();
+    
+    component.intervals = [{ start: '22:00', end: '07:00' }];
+    component.quality = 3;
+    expect(component.canSave()).toBeTrue();
+  });
+
+  it('должен сохранять сон', () => {
+    const emitSpy = spyOn(component.saved, 'emit');
+    component.intervals = [{ start: '22:00', end: '07:00' }];
+    component.quality = 4;
+    
+    component.saveSleep();
+    
+    expect(sleepServiceSpy.saveDay).toHaveBeenCalled();
+    expect(emitSpy).toHaveBeenCalled();
+  });
+
+  it('должен очищать форму', () => {
+    component.intervals = [{ start: '23:00', end: '08:00' }];
+    component.quality = 2;
+    component.note = 'Тест';
+    
+    component.clearForm();
+    
+    expect(component.intervals.length).toBe(1);
+    expect(component.intervals[0].start).toBe('22:00');
+    expect(component.note).toBe('');
+  });
+});
+
+
+================================================================================
+FILE: ./src/app/components/sleep-form/sleep-form.component.ts
+================================================================================
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
+import { SleepService } from '../../services/sleep.service';
+import { SleepDay, SleepInterval } from '../../models';
+
+@Component({
+  selector: 'app-sleep-form',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule
+  ],
+  templateUrl: './sleep-form.component.html',
+  styleUrls: ['./sleep-form.component.scss']
+})
+export class SleepFormComponent implements OnInit {
+
+  selectedDate: 'today' | 'yesterday' | 'custom' = 'today';
+  selectedCustomDate?: Date;
+  showDatePicker = false;
+
+  intervals: SleepInterval[] = [
+    { start: '22:00', end: '07:00' }
+  ];
+
+  quality = 3;
+  note = '';
+  totalSleep = '';
+
+  qualityTexts = [
+    '😫 Очень плохо',
+    '😞 Плохо',
+    '😐 Нормально',
+    '🙂 Хорошо',
+    '😊 Отлично'
+  ];
+
+  @Output() saved = new EventEmitter<void>();
+  @Output() canceled = new EventEmitter<void>();
+
+  constructor(private sleepService: SleepService) {}
+
+  ngOnInit(): void {
+    this.selectDate('today');
+    this.calculateTotalSleep();
+  }
+
+  /* =======================
+     ДАТА
+  ======================= */
+
+  selectDate(type: 'today' | 'yesterday'): void {
+    this.selectedDate = type;
+    this.selectedCustomDate = undefined;
+    this.showDatePicker = false;
+  }
+
+  onDateChange(event: any): void {
+    this.selectedDate = 'custom';
+    this.selectedCustomDate = event.value;
+    this.showDatePicker = false;
+  }
+
+  get selectedDateValue(): string {
+    if (this.selectedDate === 'custom' && this.selectedCustomDate) {
+      return this.selectedCustomDate.toISOString().split('T')[0];
+    }
+
+    const date = new Date();
+    if (this.selectedDate === 'yesterday') {
+      date.setDate(date.getDate() - 1);
+    }
+    return date.toISOString().split('T')[0];
+  }
+
+  /* =======================
+     ИНТЕРВАЛЫ
+  ======================= */
+
+  addInterval(): void {
+    this.intervals.push({ start: '', end: '' });
+  }
+
+  removeInterval(index: number): void {
+    if (this.intervals.length > 1) {
+      this.intervals.splice(index, 1);
+      this.calculateTotalSleep();
+    }
+  }
+
+  /* =======================
+     РАСЧЁТ ВРЕМЕНИ
+  ======================= */
+
+  getIntervalDuration(interval: SleepInterval): string {
+    const minutes = this.getIntervalMinutes(interval);
+    if (minutes === 0) return '';
+
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+
+    if (m === 0) return `${h}ч`;
+    if (h === 0) return `${m}м`;
+    return `${h}ч ${m}м`;
+  }
+
+  calculateTotalSleep(): void {
+    if (this.intervals.length === 0) {
+      this.totalSleep = '';
+      return;
+    }
+    
+    let totalMinutes = 0;
+    
+    for (const interval of this.intervals) {
+      if (!interval.start || !interval.end) continue;
+      
+      const start = this.timeToMinutes(interval.start);
+      const end = this.timeToMinutes(interval.end);
+      
+      if (start === null || end === null) continue;
+      
+      let duration = end - start;
+      if (duration < 0) duration += 24 * 60; // сон через полночь
+      totalMinutes += duration;
+    }
+    
+    if (totalMinutes === 0) {
+      this.totalSleep = '';
+      return;
+    }
+    
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    // 👇 Сохраняем в формате, который будем показывать в таблице
+    if (hours === 0) {
+      this.totalSleep = `${minutes}м`;
+    } else if (minutes === 0) {
+      this.totalSleep = `${hours}ч`;
+    } else {
+      this.totalSleep = `${hours}ч ${minutes}м`;
+    }
+  }
+
+  private getIntervalMinutes(interval: SleepInterval): number {
+    if (!interval.start || !interval.end) return 0;
+
+    const start = this.timeToMinutes(interval.start);
+    const end = this.timeToMinutes(interval.end);
+    if (start === null || end === null) return 0;
+
+    let duration = end - start;
+    if (duration < 0) duration += 1440; // через полночь
+
+    return duration;
+  }
+
+  private timeToMinutes(time: string): number | null {
+    const [h, m] = time.split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+  }
+
+  /* =======================
+     КЛЮЧЕВОЕ — РАЗБИЕНИЕ
+  ======================= */
+
+  private splitIntervalByMidnight(
+    date: string,
+    interval: SleepInterval
+  ): { date: string; start: string; end: string }[] {
+
+    const startMin = this.timeToMinutes(interval.start);
+    const endMin = this.timeToMinutes(interval.end);
+
+    if (startMin === null || endMin === null) return [];
+
+    // не через полночь
+    if (endMin > startMin) {
+      return [{ date, start: interval.start, end: interval.end }];
+    }
+
+    // через полночь
+    const current = new Date(date);
+    const prev = new Date(current);
+    prev.setDate(prev.getDate() - 1);
+
+    return [
+      {
+        date: prev.toISOString().split('T')[0],
+        start: interval.start,
+        end: '23:59'
+      },
+      {
+        date,
+        start: '00:00',
+        end: interval.end
+      }
+    ];
+  }
+
+  /* =======================
+     СОХРАНЕНИЕ
+  ======================= */
+
+  canSave(): boolean {
+    return this.intervals.some(i => i.start && i.end) && this.quality > 0;
+  }
+
+  private getNightStartDate(): string {
+    const wakeUp = new Date(this.selectedDateValue);
+    wakeUp.setDate(wakeUp.getDate() - 1);
+    return wakeUp.toISOString().split('T')[0];
+  }
+
+  saveSleep(): void {
+    if (!this.canSave()) return;
+
+    const validIntervals = this.intervals.filter(interval => 
+      interval.start && interval.end && 
+      interval.start.trim() !== '' && 
+      interval.end.trim() !== ''
+    );
+
+    // Проходим по каждому интервалу
+    validIntervals.forEach(interval => {
+      // Используем вашу готовую функцию splitIntervalByMidnight
+      // Она вернет массив из 1 или 2 элементов
+      const pieces = this.splitIntervalByMidnight(this.selectedDateValue, interval);
+
+      pieces.forEach(piece => {
+        // Для каждой части (дня) создаем или обновляем запись
+        const sleepDay: SleepDay = {
+          date: piece.date,
+          intervals: [{ start: piece.start, end: piece.end }],
+          quality: this.quality,
+          note: this.note.trim() || undefined,
+          // totalDuration для конкретного дня лучше пересчитать на лету в сервисе 
+          // или оставить пустой, так как она будет считаться из всех интервалов дня
+        };
+
+        this.sleepService.saveDay(sleepDay);
+      });
+    });
+
+    this.clearForm();
+    this.saved.emit();
+  }
+
+
+  cancelForm(): void {
+    this.clearForm();
+    this.canceled.emit();
+  }
+
+  clearForm(): void {
+    this.selectedDate = 'today';
+    this.selectedCustomDate = undefined;
+    this.intervals = [{ start: '22:00', end: '07:00' }];
+    this.quality = 3;
+    this.note = '';
+    this.totalSleep = '';
+    this.showDatePicker = false;
+    this.calculateTotalSleep();
+  }
+
+  getQualityText(): string {
+    return this.qualityTexts[this.quality - 1] || '';
+  }
+  getDisplayDateWithCorrectNight(): string {
+    const date = new Date(this.selectedDateValue);
+
+    const hasOvernightSleep = this.intervals.some(interval => {
+      if (!interval.start || !interval.end) return false;
+
+      const start = this.timeToMinutes(interval.start);
+      const end = this.timeToMinutes(interval.end);
+
+      return start !== null && end !== null && end < start;
+    });
+
+    // Если сон через полночь — показываем диапазон дат
+    if (hasOvernightSleep) {
+      const prevDate = new Date(date);
+      prevDate.setDate(prevDate.getDate() - 1);
+
+      const prev = prevDate.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long'
+      });
+
+      const curr = date.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long'
+      });
+
+      return `${prev} – ${curr}`;
+    }
+
+    // Обычный случай
+    return date.toLocaleDateString('ru-RU', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+}
+
+
+================================================================================
+FILE: ./src/app/components/sleep-log/sleep-log.component.html
+================================================================================
+<div class="sleep-log">
+  <div class="header">
+    <div class="month-navigation">
+      <button mat-icon-button (click)="previousMonth()" class="nav-btn">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <div class="month-display">
+        <span class="month-name">{{ currentMonthName }} {{ currentYear }}</span>
+      </div>
+      <button mat-icon-button (click)="nextMonth()" class="nav-btn">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <button mat-raised-button color="primary" (click)="openAddSleepForm()" class="add-day-btn">
+      <mat-icon>add</mat-icon>
+      Добавить день
+    </button>
+  </div>
+
+  <div class="add-sleep-overlay" *ngIf="showAddSleepForm" (click)="closeAddSleepForm()">
+    <div class="add-sleep-container" (click)="$event.stopPropagation()">
+      <div class="overlay-header">
+        <h3>Добавить запись сна</h3>
+        <button mat-icon-button (click)="closeAddSleepForm()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div class="overlay-content">
+        <app-sleep-form 
+          (saved)="onSleepSaved()"
+          (canceled)="closeAddSleepForm()">
+        </app-sleep-form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="stats" *ngIf="filteredDays.length > 0">
+    <span class="stat-item">
+      <span class="stat-number">{{ filteredDays.length }}</span>
+      <span class="stat-label">дней</span>
+    </span>
+    <span class="stat-item">
+      <span class="stat-number">{{ avgSleepHours | number:'1.1-1' }}</span>
+      <span class="stat-label">часов сна</span>
+    </span>
+    <span class="stat-item">
+      <span class="stat-number">{{ avgQuality | number:'1.1-1' }}</span>
+      <span class="stat-label">оценка</span>
+    </span>
+  </div>
+
+  <div class="table-container">
+    <table class="sleep-table" *ngIf="filteredDays.length > 0">
+      <thead>
+        <tr>
+          <th class="col-date">День</th>
+          <th class="col-sleep">Сон</th>
+          <th class="col-quality">Оценка</th>
+          <th class="col-note">Примечание</th>
+          <th class="col-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let day of filteredDays; let i = index" 
+            class="sleep-row"
+            [class.editing]="editingIndex === i">
+          
+          <td class="col-date">
+            <span class="date-compact">{{ getDayNumber(day.date) }} {{ getDayOfWeek(day.date) }}</span>
+          </td>
+          
+          <td class="col-sleep">
+            <div class="sleep-content" *ngIf="editingIndex !== i">
+              <div class="sleep-display">
+                <span class="sleep-time">
+                  {{ getCombinedSleepTime(day.date) }}
+                </span>
+              </div>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-intervals">
+              <div *ngFor="let interval of editIntervals; let j = index" class="edit-interval">
+                <div class="time-input-wrapper">
+                  <input type="time" 
+                         [(ngModel)]="editIntervals[j].start" 
+                         class="time-input"
+                         placeholder="ЧЧ:ММ">
+                  <mat-icon class="time-icon">schedule</mat-icon>
+                </div>
+                
+                <span class="time-separator">—</span>
+                
+                <div class="time-input-wrapper">
+                  <input type="time" 
+                         [(ngModel)]="editIntervals[j].end" 
+                         class="time-input"
+                         placeholder="ЧЧ:ММ">
+                  <mat-icon class="time-icon">schedule</mat-icon>
+                </div>
+                
+                <div class="duration-group">
+                  <span class="interval-duration" *ngIf="editIntervals[j].start && editIntervals[j].end">
+                    {{ calculateDuration(editIntervals[j]) }}
+                  </span>
+                  <div class="duration-label">всего</div>
+                </div>
+                
+                <button mat-icon-button type="button" (click)="removeEditInterval(j)" 
+                        *ngIf="editIntervals.length > 1" class="remove-interval-btn">
+                  <mat-icon>remove</mat-icon>
+                </button>
+              </div>
+              
+              <button mat-button type="button" (click)="addEditInterval()" class="add-interval-btn">
+                <mat-icon>add</mat-icon> Еще интервал
+              </button>
+            </div>
+          </td>
+          
+          <td class="col-quality">
+            <div *ngIf="editingIndex !== i" class="quality-content">
+              <span class="stars-compact">
+                <span *ngFor="let star of [1,2,3,4,5]">
+                  {{ star <= (day.quality || 0) ? '★' : '☆' }}
+                </span>
+              </span>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-stars">
+              <button mat-icon-button *ngFor="let star of [1,2,3,4,5]" 
+                      (click)="editQuality = star" class="star-btn">
+                <mat-icon>{{ star <= editQuality ? 'star' : 'star_border' }}</mat-icon>
+              </button>
+            </div>
+          </td>
+          
+          <td class="col-note">
+            <div *ngIf="editingIndex !== i" class="note-content">
+              <span class="note-text" [title]="day.note || ''">
+                {{ day.note || '—' }}
+              </span>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-note">
+              <textarea [(ngModel)]="editNote" 
+                        class="note-edit" 
+                        placeholder="Примечание (необязательно)" 
+                        rows="1"
+                        (keydown.escape)="cancelEdit()"></textarea>
+            </div>
+          </td>
+          
+          <td class="col-actions">
+            <div *ngIf="editingIndex !== i" class="menu-container">
+              <button mat-icon-button 
+                      [matMenuTriggerFor]="menu" 
+                      class="menu-btn"
+                      (click)="$event.stopPropagation()">
+                <mat-icon class="menu-icon">more_vert</mat-icon>
+              </button>
+              
+              <mat-menu #menu="matMenu" class="custom-menu">
+                <button mat-menu-item (click)="startEdit(i, day)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Редактировать</span>
+                </button>
+                <button mat-menu-item (click)="deleteDay(day.date)" class="delete-item">
+                  <mat-icon>delete</mat-icon>
+                  <span>Удалить</span>
+                </button>
+              </mat-menu>
+            </div>
+            
+            <div *ngIf="editingIndex === i" class="edit-buttons">
+              <button mat-button 
+                      (click)="saveEdit()" 
+                      class="save-btn"
+                      [disabled]="!canSaveEdit()"
+                      matTooltip="Сохранить изменения">
+                Готово
+              </button>
+              <button mat-button 
+                      (click)="cancelEdit()" 
+                      class="cancel-btn"
+                      matTooltip="Отменить редактирование">
+                Отмена
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredDays.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">bed</mat-icon>
+      <h3>Нет записей за {{ currentMonthName | lowercase }} {{ currentYear }}</h3>
+      <button mat-raised-button color="primary" (click)="openAddSleepForm()">
+        <mat-icon>add</mat-icon>
+        Добавить первую запись
+      </button>
+    </div>
+  </div>
+
+</div>
+
+
+================================================================================
+FILE: ./src/app/components/sleep-log/sleep-log.component.scss
+================================================================================
+// src/app/components/sleep-log/sleep-log.component.scss
+
+.sleep-log {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  overflow-x: hidden; // Добавляем, чтобы скрыть горизонтальный скролл на уровне компонента
+}
+
+// Заголовок
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+// Навигация по месяцам
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn {
+  color: #94a3b8;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+  
+  &:hover {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+  }
+}
+
+.month-display {
+  display: flex;
+  align-items: center;
+  min-width: 180px;
+}
+
+.month-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+// Кнопка добавления дня
+.add-day-menu {
+  position: relative;
+}
+
+.add-day-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  height: 44px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  
+  &:hover {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  }
+  
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}
+
+// Диалог выбора даты
+.date-picker-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.date-picker-content {
+  position: relative;
+  z-index: 1001;
+  background: rgba(30, 41, 59, 0.95);
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  
+  h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #e2e8f0;
+    text-align: center;
+  }
+}
+
+.date-input {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  margin-bottom: 20px;
+  
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+}
+
+.date-picker-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  
+  button {
+    min-width: 100px;
+  }
+}
+
+// Статистика
+.stats {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// КОНТЕЙНЕР ТАБЛИЦЫ - БЕЗ СКРОЛЛА
+.table-container {
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  overflow: hidden; // Убираем overflow-x
+  width: 100%;
+}
+
+// ТАБЛИЦА - ШИРИНА 100%
+.sleep-table {
+  width: 100%; // Занимает всю ширину контейнера
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+
+// Заголовки таблицы
+.sleep-table th {
+  text-align: left;
+  padding: 12px 8px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #6366f1;
+  white-space: nowrap;
+  background: rgba(30, 41, 59, 0.8);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+// ОПТИМИЗИРОВАННЫЕ ШИРИНЫ КОЛОНОК (сумма = примерно 100%)
+.col-date {
+  width: 8%; // 8% от общей ширины
+  min-width: 80px;
+  max-width: 80px;
+}
+
+.col-sleep {
+  width: 45%; // 45% от общей ширины
+  min-width: 450px;
+}
+
+.col-quality {
+  width: 10%; // 10% от общей ширины
+  min-width: 100px;
+  max-width: 120px;
+}
+
+.col-note {
+  width: 22%; // 22% от общей ширины
+  min-width: 200px;
+}
+
+.col-actions {
+  width: 15%; // 15% от общей ширины
+  min-width: 120px;
+  max-width: 150px;
+  text-align: center;
+}
+
+// ЯЧЕЙКИ ТАБЛИЦЫ
+.sleep-table td {
+  padding: 12px 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+  height: auto !important;
+  min-height: 60px;
+  overflow: visible !important;
+}
+
+// Строки таблицы
+.sleep-row {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+    
+    .menu-btn {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+  
+  &.editing {
+    background: rgba(99, 102, 241, 0.08) !important;
+    border-left: 3px solid #6366f1;
+    
+    td {
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+      overflow: visible !important;
+    }
+    
+    .col-sleep {
+      overflow: visible !important;
+    }
+  }
+}
+
+// Дата
+.date-compact {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+// Сон
+.sleep-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 30px;
+}
+
+.sleep-bar {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #6366f1;
+  line-height: 1;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  min-width: 150px;
+}
+
+.sleep-time {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+  min-width: 50px;
+}
+
+// РЕДАКТИРОВАНИЕ ИНТЕРВАЛОВ СНА
+.edit-intervals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.edit-interval {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.time-input-wrapper {
+  position: relative;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.time-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  padding: 6px 30px 6px 10px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  box-sizing: border-box;
+  
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+  }
+}
+
+.time-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 16px;
+  height: 16px;
+  width: 16px;
+  pointer-events: none;
+}
+
+.time-separator {
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 16px;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+// Группа длительности
+.duration-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.interval-duration {
+  min-width: 60px;
+  color: #6366f1;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  background: rgba(99, 102, 241, 0.15);
+  padding: 6px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  font-family: 'Courier New', monospace;
+  box-sizing: border-box;
+}
+
+.duration-label {
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.remove-interval-btn {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  color: #ef4444 !important;
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin-left: 8px;
+  
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+  
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.add-interval-btn {
+  margin-top: 4px;
+  color: #6366f1 !important;
+  font-size: 12px !important;
+  height: 28px !important;
+  align-self: flex-start;
+  flex-shrink: 0;
+  
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+    margin-right: 4px;
+  }
+}
+
+// Оценка качества
+.quality-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.stars-compact {
+  font-size: 14px;
+  color: #fbbf24;
+  letter-spacing: 1px;
+  
+  span {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+  }
+}
+
+.edit-stars {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+
+.star-btn {
+  color: #fbbf24 !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 24px !important;
+  flex-shrink: 0;
+  
+  .mat-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    font-size: 18px !important;
+    line-height: 18px !important;
+  }
+}
+
+// Примечание
+.note-content {
+  width: 100%;
+  overflow: hidden;
+}
+
+.note-text {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #cbd5e1;
+  font-size: 12px;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+.edit-note {
+  width: 100%;
+}
+
+.note-edit {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  padding: 8px;
+  font-size: 12px;
+  line-height: 1.3;
+  resize: vertical;
+  min-height: 36px;
+  max-height: 72px;
+  font-family: inherit;
+  
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+  }
+  
+  &::placeholder {
+    color: #94a3b8;
+  }
+}
+
+// Действия
+.menu-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+}
+
+.menu-btn {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  
+  .menu-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    color: #94a3b8;
+  }
+  
+  &:hover {
+    .menu-icon {
+      color: #6366f1;
+    }
+  }
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.save-btn, .cancel-btn {
+  padding: 2px 10px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  line-height: 24px !important;
+  white-space: nowrap;
+}
+
+.save-btn {
+  color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  
+  &:hover:not([disabled]) {
+    background: rgba(16, 185, 129, 0.2) !important;
+  }
+  
+  &[disabled] {
+    opacity: 0.5;
+    color: #94a3b8 !important;
+    background: rgba(148, 163, 184, 0.1) !important;
+  }
+}
+
+.cancel-btn {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  
+  &:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+  }
+}
+
+// Меню
+.custom-menu {
+  background: rgba(30, 41, 59, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  min-width: 160px !important;
+  overflow: hidden !important;
+  
+  .mat-mdc-menu-item {
+    height: 40px !important;
+    min-height: 40px !important;
+    line-height: 40px !important;
+    font-size: 13px !important;
+    color: #e2e8f0 !important;
+    padding: 0 12px !important;
+    
+    .mat-icon {
+      font-size: 18px !important;
+      height: 18px !important;
+      width: 18px !important;
+      margin-right: 12px !important;
+      color: #94a3b8 !important;
+    }
+    
+    &:hover {
+      background: rgba(99, 102, 241, 0.1) !important;
+    }
+  }
+}
+
+.delete-item {
+  color: #ef4444 !important;
+  
+  .mat-icon {
+    color: #ef4444 !important;
+  }
+  
+  &:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+  }
+}
+
+// Пустое состояние
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: #e2e8f0;
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+}
+
+.empty-state button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+  
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}
+
+// Легенда
+.legend {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.legend-symbol {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  
+  &.asleep {
+    color: #6366f1;
+  }
+  
+  &.awake {
+    color: #475569;
+  }
+}
+
+// Анимации
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Медиа-запрос для очень узких экранов
+@media (max-width: 1200px) {
+  .sleep-log {
+    max-width: 100%;
+    padding: 12px;
+  }
+  
+  // Уменьшаем ширину колонок для узких экранов
+  .col-date {
+    width: 7%;
+    min-width: 70px;
+  }
+  
+  .col-sleep {
+    width: 43%;
+    min-width: 400px;
+  }
+  
+  .col-quality {
+    width: 12%;
+    min-width: 90px;
+  }
+  
+  .col-note {
+    width: 23%;
+    min-width: 180px;
+  }
+  
+  .col-actions {
+    width: 15%;
+    min-width: 110px;
+  }
+  
+  // Уменьшаем элементы редактирования
+  .time-input-wrapper {
+    width: 90px;
+  }
+  
+  .duration-group {
+    min-width: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .month-navigation {
+    justify-content: center;
+  }
+  
+  .add-day-menu {
+    align-self: center;
+  }
+  
+  .stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .sleep-table {
+    min-width: 800px; 
+  }
+  
+  .edit-interval {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .time-input-wrapper {
+    width: 85px;
+  }
+}
+// ДИАЛОГ ДОБАВЛЕНИЯ СНА
+.add-sleep-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.add-sleep-dialog {
+  background: rgba(30, 41, 59, 0.95);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  h3 {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 1.4rem;
+  }
+}
+
+.close-btn {
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
+}
+
+.dialog-content {
+  padding: 24px;
+}
+
+.dialog-section {
+  margin-bottom: 28px;
+  
+  h4 {
+    color: #e2e8f0;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+  }
+}
+
+.date-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  
+  button {
+    flex: 1;
+    
+    &.active {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+    }
+  }
+}
+
+.date-picker-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.selected-date-info {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  text-align: center;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  
+  mat-form-field {
+    flex: 1;
+  }
+  
+  .time-separator {
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 18px;
+  }
+}
+
+.duration-display {
+  padding: 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  color: #6366f1;
+  font-weight: 600;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  
+  button {
+    color: #fbbf24;
+  }
+}
+
+.quality-text {
+  text-align: center;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+  
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.05);
+  }
+  
+  &::placeholder {
+    color: #94a3b8;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  button:last-child {
+    min-width: 120px;
+  }
+}
+
+// Анимации для диалога
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Адаптивность диалога
+@media (max-width: 600px) {
+  .add-sleep-dialog {
+    width: 95%;
+    max-height: 85vh;
+  }
+  
+  .date-options {
+    flex-direction: column;
+  }
+  
+  .time-inputs {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .time-separator {
+      align-self: center;
+    }
+  }
+}
+.add-sleep-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.add-sleep-container {
+  background: rgba(30, 41, 59, 0.95);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+}
+
+.overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  h3 {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 1.4rem;
+  }
+}
+
+.overlay-content {
+  padding: 24px;
+  
+  app-sleep-form {
+    display: block;
+    
+    // Увеличиваем форму для overlay
+    .simple-form {
+      max-width: 100%;
+      padding: 0;
+      
+      .date-section, .intervals-section, .quality-section, .note-section {
+        background: rgba(255, 255, 255, 0.05);
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.sleep-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.sleep-intervals-text {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.sleep-time-badge {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.15);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.sleep-visual {
+  margin-top: 4px;
+}
+.sleep-details {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.sleep-total-hours {
+  margin-left: 10px;
+  font-weight: 600;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  min-width: 70px;
+  text-align: center;
+}
+
+
+================================================================================
+FILE: ./src/app/components/sleep-log/sleep-log.component.ts
+================================================================================
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+import { SleepService } from '../../services/sleep.service';
+import { SleepDay, SleepInterval } from '../../models';
+import { MatMenuModule } from '@angular/material/menu';
+import { SleepFormComponent } from '../sleep-form/sleep-form.component';
+
+@Component({
+  selector: 'app-sleep-log',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+    FormsModule,
+    MatMenuModule,
+    SleepFormComponent
+  ],
+  templateUrl: './sleep-log.component.html',
+  styleUrls: ['./sleep-log.component.scss']
+})
+export class SleepLogComponent implements OnInit {
+  sleepDays: SleepDay[] = [];
+  filteredDays: SleepDay[] = [];
+  currentMonth: number = new Date().getMonth();
+  currentYear: number = new Date().getFullYear();
+  
+  monthNames = [
+    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+  ];
+  
+  editingIndex: number = -1;
+  editIntervals: SleepInterval[] = [];
+  editQuality: number = 3;
+  editNote: string = '';
+  originalDay: SleepDay | null = null;
+  
+  showAddSleepForm: boolean = false;
+
+  constructor(private sleepService: SleepService) {}
+
+  ngOnInit(): void {
+    this.sleepService.getDays().subscribe(days => {
+      this.sleepDays = days;
+      this.filterDaysByMonth();
+    });
+  }
+
+  openAddSleepForm(): void {
+    this.showAddSleepForm = true;
+  }
+
+  closeAddSleepForm(): void {
+    this.showAddSleepForm = false;
+  }
+
+  onSleepSaved(): void {
+    this.closeAddSleepForm();
+    this.sleepService.getDays().subscribe(days => {
+      this.sleepDays = days;
+      this.filterDaysByMonth();
+    });
+  }
+
+  get currentMonthName(): string {
+    return this.monthNames[this.currentMonth];
+  }
+
+  private filterDaysByMonth(): void {
+    this.filteredDays = this.sleepDays.filter(day => {
+      const date = new Date(day.date);
+      return date.getMonth() === this.currentMonth && 
+             date.getFullYear() === this.currentYear;
+    });
+    
+    this.filteredDays.sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+  }
+
+  startEdit(index: number, day: SleepDay): void {
+    this.editingIndex = index;
+    this.editIntervals = [...day.intervals];
+    this.editQuality = day.quality || 3;
+    this.editNote = day.note || '';
+    this.originalDay = { ...day };
+  }
+
+  addEditInterval(): void {
+    this.editIntervals.push({ start: '22:00', end: '07:00' });
+  }
+
+  removeEditInterval(index: number): void {
+    if (this.editIntervals.length > 1) {
+      this.editIntervals.splice(index, 1);
+    }
+  }
+
+  canSaveEdit(): boolean {
+    return this.editIntervals.every(interval => 
+      interval.start && interval.end && 
+      interval.start.trim() !== '' && 
+      interval.end.trim() !== ''
+    ) && this.editQuality > 0;
+  }
+
+  saveEdit(): void {
+    if (!this.canSaveEdit() || this.editingIndex === -1 || !this.originalDay) return;
+
+    const validIntervals = this.editIntervals.filter(interval => 
+      interval.start && interval.end && 
+      interval.start.trim() !== '' && 
+      interval.end.trim() !== ''
+    );
+
+    const updatedDay: SleepDay = {
+      date: this.originalDay.date,
+      intervals: validIntervals,
+      quality: this.editQuality,
+      note: this.editNote.trim() || undefined
+    };
+
+    this.sleepService.saveDay(updatedDay);
+    this.cancelEdit();
+    
+    this.sleepService.getDays().subscribe(days => {
+      this.sleepDays = days;
+      this.filterDaysByMonth();
+    });
+  }
+
+  cancelEdit(): void {
+    this.editingIndex = -1;
+    this.editIntervals = [];
+    this.editQuality = 3;
+    this.editNote = '';
+    this.originalDay = null;
+  }
+
+  previousMonth(): void {
+    if (this.currentMonth === 0) {
+      this.currentMonth = 11;
+      this.currentYear--;
+    } else {
+      this.currentMonth--;
+    }
+    this.filterDaysByMonth();
+    this.cancelEdit();
+  }
+
+  nextMonth(): void {
+    if (this.currentMonth === 11) {
+      this.currentMonth = 0;
+      this.currentYear++;
+    } else {
+      this.currentMonth++;
+    }
+    this.filterDaysByMonth();
+    this.cancelEdit();
+  }
+
+  getDayNumber(dateString: string): string {
+    const date = new Date(dateString);
+    return date.getDate().toString();
+  }
+
+  getDayOfWeek(dateString: string): string {
+    const date = new Date(dateString);
+    const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    return days[date.getDay()];
+  }
+
+  getCombinedSleepTime(dateStr: string): string {
+    const date = new Date(dateStr);
+    
+    const currentDay = this.sleepDays.find(d => d.date === dateStr);
+    let totalMinutes = 0;
+    
+    if (currentDay && currentDay.intervals) {
+      currentDay.intervals.forEach(interval => {
+        const start = this.timeToMinutes(interval.start);
+        const end = this.timeToMinutes(interval.end);
+        
+        if (start !== null && end !== null) {
+          if (end < start) {
+            totalMinutes += (1440 - start) + end;
+          } else {
+            totalMinutes += (end - start);
+          }
+        }
+      });
+    }
+    
+    const prevDate = new Date(date);
+    prevDate.setDate(prevDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split('T')[0];
+    
+    const prevDay = this.sleepDays.find(d => d.date === prevDateStr);
+    if (prevDay && prevDay.intervals) {
+      prevDay.intervals.forEach(interval => {
+        const start = this.timeToMinutes(interval.start);
+        const end = this.timeToMinutes(interval.end);
+        
+        if (start !== null && end !== null && end < start) {
+          totalMinutes += end;
+        }
+      });
+    }
+    
+    if (totalMinutes === 0) return '';
+    
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (hours === 0) return `${minutes}м`;
+    if (minutes === 0) return `${hours}ч`;
+    return `${hours}ч ${minutes}м`;
+  }
+
+  get avgQuality(): number {
+    if (this.filteredDays.length === 0) return 0;
+    const sum = this.filteredDays.reduce((total: number, day: SleepDay) => total + (day.quality || 0), 0);
+    return sum / this.filteredDays.length;
+  }
+
+  get avgSleepHours(): number {
+    if (this.filteredDays.length === 0) return 0;
+    
+    const totalMinutes = this.filteredDays.reduce((total: number, day: SleepDay) => {
+      if (!day.intervals || day.intervals.length === 0) return total;
+      
+      const dayMinutes = day.intervals.reduce((dayTotal: number, interval: SleepInterval) => {
+        const start = this.timeToMinutes(interval.start);
+        const end = this.timeToMinutes(interval.end);
+        
+        if (start === null || end === null) return dayTotal;
+        
+        if (end < start) {
+          return dayTotal + ((1440 - start) + end);
+        } else {
+          return dayTotal + (end - start);
+        }
+      }, 0);
+      
+      return total + dayMinutes;
+    }, 0);
+    
+    return totalMinutes / (this.filteredDays.length * 60);
+  }
+
+  private timeToMinutes(time: string): number | null {
+    if (!time || time.trim() === '') return null;
+    const parts = time.split(':');
+    if (parts.length !== 2) return null;
+    
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    
+    if (isNaN(hours) || isNaN(minutes)) return null;
+    
+    const normalizedHours = ((hours % 24) + 24) % 24;
+    return normalizedHours * 60 + minutes;
+  }
+
+  deleteDay(date: string): void {
+    if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+      this.sleepService.deleteDay(date);
+      
+      if (this.editingIndex !== -1 && this.originalDay?.date === date) {
+        this.cancelEdit();
+      }
+    }
+  }
+  
+  calculateDuration(interval: SleepInterval): string {
+    const start = this.timeToMinutes(interval.start);
+    const end = this.timeToMinutes(interval.end);
+    
+    if (start === null || end === null) return '';
+    
+    let durationMinutes: number;
+    
+    if (end < start) {
+      durationMinutes = (1440 - start) + end;
+    } else {
+      durationMinutes = end - start;
+    }
+    
+    const hours = Math.floor(durationMinutes / 60);
+    const minutes = durationMinutes % 60;
+    
+    if (hours === 0) {
+      return `${minutes}м`;
+    } else if (minutes === 0) {
+      return `${hours}ч`;
+    } else {
+      return `${hours}ч ${minutes}м`;
+    }
+  }
+}
+
+
+================================================================================
+FILE: ./src/app/components/sleep-mode/sleep-mode.component.html
+================================================================================
+<div class="sleep-mode-container">
+  <!-- Кнопки управления -->
+  <div class="controls">
+    <button mat-icon-button class="fullscreen-btn" (click)="toggleFullscreen()">
+      <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+    </button>
+    
+    <button mat-icon-button class="exit-btn" routerLink="/">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <!-- Основной контейнер -->
+  <div class="fullscreen-content" #fullscreenContent>
+    <!-- Звезды -->
+    <div class="stars">
+      <div *ngFor="let star of stars" 
+           class="star"
+           [style.top]="star.top"
+           [style.left]="star.left"
+           [style.width]="star.size"
+           [style.height]="star.size"
+           [style.animation-duration]="star.duration">
+      </div>
+    </div>
+    
+    <!-- Часы -->
+    <div class="clock-container">
+      <div class="clock" [innerHTML]="currentTime"></div>
+      <div class="date-display">{{ currentDate }}</div>
+    </div>
+    
+    <!-- ВРЕМЯ ВОСХОДА И ЗАКАТА -->
+    <div class="sun-times" *ngIf="sunrise && sunset">
+      <div class="sun-time-item">
+        <mat-icon class="sunrise-icon">wb_twilight</mat-icon>
+        <span class="sun-time-text">Рассвет: {{ sunrise }}</span>
+      </div>
+      <div class="sun-time-item">
+        <mat-icon class="sunset-icon">nightlight</mat-icon>
+        <span class="sun-time-text">Закат: {{ sunset }}</span>
+      </div>
+    </div>
+    
+    <!-- Подсказка -->
+    <p class="hint">Этот режим предназначен для подготовки ко сну.<br>Приглушите свет и расслабьтесь.</p>
+    
+    <!-- Дополнительная подсказка -->
+    <p class="sleep-tip">Совет: Дышите глубоко и медленно для быстрого засыпания</p>
+  </div>
+</div>
+
+
+================================================================================
+FILE: ./src/app/components/sleep-mode/sleep-mode.component.scss
+================================================================================
+// src/app/components/sleep-mode/sleep-mode.component.scss
+.sleep-mode-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 64px);
+  color: #ffffff;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+// Панель управления
+.controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+  
+  button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+  }
+  
+  .fullscreen-btn {
+    background: rgba(99, 102, 241, 0.3);
+    border-color: rgba(99, 102, 241, 0.5);
+    
+    &:hover {
+      background: rgba(99, 102, 241, 0.5);
+    }
+  }
+  
+  .exit-btn {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    
+    &:hover {
+      background: rgba(239, 68, 68, 0.5);
+    }
+  }
+}
+
+// Контент для полноэкранного режима
+.fullscreen-content {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  // Стили при обычном режиме
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  
+  // Стили при полноэкранном режиме
+  &:fullscreen,
+  &:-webkit-full-screen,
+  &:-moz-full-screen,
+  &:-ms-fullscreen {
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: linear-gradient(135deg, #0a0a1a, #252547, #1a1a35);
+    
+    .clock {
+      font-size: 8rem !important;
+      letter-spacing: 8px !important;
+    }
+    
+    .date-display {
+      font-size: 1.8rem !important;
+      margin-top: 2rem !important;
+    }
+    
+    .hint {
+      font-size: 1.5rem !important;
+      opacity: 0.8 !important;
+      margin-top: 3rem !important;
+      max-width: 600px !important;
+    }
+    
+    .sleep-tip {
+      font-size: 1.2rem !important;
+      opacity: 0.7 !important;
+    }
+    
+    .stars {
+      .star {
+        size: calc(var(--size) * 1.5) !important;
+      }
+    }
+  }
+}
+
+// Звезды
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+  
+  // В полноэкранном режиме звезды занимают весь экран
+  :fullscreen &,
+  .fullscreen-content:-webkit-full-screen &,
+  .fullscreen-content:-moz-full-screen &,
+  .fullscreen-content:-ms-fullscreen & {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle var(--duration) infinite alternate;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.2; }
+  100% { opacity: 0.8; }
+}
+
+// Часы
+.clock-container {
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 3rem 4rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: glow 3s infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 30px rgba(99, 102, 241, 0.2);
+  }
+  100% {
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 60px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.clock {
+  font-size: 5rem;
+  font-weight: 300;
+  letter-spacing: 4px;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+}
+
+.time-separator {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.date-display {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  opacity: 0.8;
+  font-weight: 300;
+}
+
+.hint {
+  font-size: 1.1rem;
+  opacity: 0.7;
+  margin-top: 2rem;
+  max-width: 400px;
+  line-height: 1.6;
+  font-weight: 300;
+  position: relative;
+  z-index: 2;
+}
+
+.sleep-tip {
+  position: absolute;
+  bottom: 2rem;
+  font-size: 0.9rem;
+  opacity: 0.5;
+  font-style: italic;
+  z-index: 2;
+}
+
+.sun-times {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 30px;
+  z-index: 2;
+  position: relative;
+  animation: fadeIn 1s ease-out;
+}
+
+.sun-time-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.sunrise-icon {
+  color: #fbbf24 !important; // Желтый для рассвета
+  font-size: 24px !important;
+  height: 24px !important;
+  width: 24px !important;
+}
+
+.sunset-icon {
+  color: #8b5cf6 !important; // Фиолетовый для заката
+  font-size: 24px !important;
+  height: 24px !important;
+  width: 24px !important;
+}
+
+.sun-time-text {
+  font-size: 1.1rem;
+  color: #ffffff;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+// Анимация появления
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+================================================================================
+FILE: ./src/app/components/sleep-mode/sleep-mode.component.ts
+================================================================================
+import { Component, OnInit, OnDestroy, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { interval, Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-sleep-mode',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
+  templateUrl: './sleep-mode.component.html',
+  styleUrls: ['./sleep-mode.component.scss']
+})
+export class SleepModeComponent implements OnInit, OnDestroy {
+  @ViewChild('fullscreenContent') fullscreenContent!: ElementRef;
+  
+  currentTime: string = '';
+  currentDate: string = '';
+  sunrise: string = '';
+  sunset: string = '';
+  private timer$!: Subscription;
+  stars: Array<{top: string, left: string, size: string, duration: string}> = [];
+  isFullscreen: boolean = false;
+
+  private readonly API_KEY = '177e95c3633ee749b721a6568d433168';
+  private lat = 55.0084;
+  private lon = 82.9357;
+  
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    this.updateTime();
+    this.updateDate();
+    this.createStars();
+    this.getSunTimes();
+    
+    this.timer$ = interval(1000).subscribe(() => {
+      this.updateTime();
+      this.updateDate();
+    });
+    
+    document.addEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+    document.addEventListener('webkitfullscreenchange', this.onFullscreenChange.bind(this));
+    document.addEventListener('mozfullscreenchange', this.onFullscreenChange.bind(this));
+    document.addEventListener('MSFullscreenChange', this.onFullscreenChange.bind(this));
+  }
+
+  ngOnDestroy(): void {
+    if (this.timer$) {
+      this.timer$.unsubscribe();
+    }
+    
+    document.removeEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
+    document.removeEventListener('webkitfullscreenchange', this.onFullscreenChange.bind(this));
+    document.removeEventListener('mozfullscreenchange', this.onFullscreenChange.bind(this));
+    document.removeEventListener('MSFullscreenChange', this.onFullscreenChange.bind(this));
+    
+    if (this.isFullscreen) {
+      this.exitFullscreen();
+    }
+  }
+
+  toggleFullscreen(): void {
+    if (this.isFullscreen) {
+      this.exitFullscreen();
+    } else {
+      this.enterFullscreen();
+    }
+  }
+
+  private enterFullscreen(): void {
+    const element = this.fullscreenContent.nativeElement;
+    
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
+    } else if (element.mozRequestFullScreen) {
+      element.mozRequestFullScreen();
+    } else if (element.msRequestFullscreen) {
+      element.msRequestFullscreen();
+    }
+  }
+
+  private exitFullscreen(): void {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if ((document as any).webkitExitFullscreen) {
+      (document as any).webkitExitFullscreen();
+    } else if ((document as any).mozCancelFullScreen) {
+      (document as any).mozCancelFullScreen();
+    } else if ((document as any).msExitFullscreen) {
+      (document as any).msExitFullscreen();
+    }
+  }
+
+  private onFullscreenChange(): void {
+    const fullscreenElement = document.fullscreenElement || 
+                             (document as any).webkitFullscreenElement ||
+                             (document as any).mozFullScreenElement ||
+                             (document as any).msFullscreenElement;
+    
+    this.isFullscreen = fullscreenElement === this.fullscreenContent.nativeElement;
+  }
+
+  @HostListener('document:keydown.escape')
+  handleEscapeKey(): void {
+    if (this.isFullscreen) {
+      this.exitFullscreen();
+    }
+  }
+
+  private updateTime(): void {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    this.currentTime = `${hours}<span class="time-separator">:</span>${minutes}<span class="time-separator">:</span>${seconds}`;
+  }
+
+  private updateDate(): void {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    this.currentDate = now.toLocaleDateString('ru-RU', options);
+  }
+
+  private createStars(): void {
+    for (let i = 0; i < 50; i++) {
+      this.stars.push({
+        top: `${Math.random() * 100}%`,
+        left: `${Math.random() * 100}%`,
+        size: `${Math.random() * 3 + 1}px`,
+        duration: `${Math.random() * 3 + 2}s`
+      });
+    }
+  }
+
+  async getSunTimes(): Promise<void> {
+    try {
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${this.lat}&lon=${this.lon}&appid=${this.API_KEY}`;
+      const data = await this.http.get<any>(url).toPromise();
+      
+      this.sunrise = this.formatTime(data.sys.sunrise);
+      this.sunset = this.formatTime(data.sys.sunset);
+      
+    } catch (error) {
+      this.sunrise = '09:52';
+      this.sunset = '17:04';
+    }
+  }
+
+  private formatTime(timestamp: number): string {
+    console.log('Timestamp to format:', timestamp);
+    
+    let date: Date;
+    
+    if (timestamp > 10000000000) {
+      date = new Date(timestamp);
+    } else {
+      date = new Date(timestamp * 1000);
+    }
+    
+    console.log('Formatted date:', date);
+    
+    const result = date.toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    console.log('Formatted time:', result);
+    return result;
+  }
+
+  updateLocation(city: string): void {
+    const cities: { [key: string]: { lat: number, lon: number } } = {
+      'Москва': { lat: 55.7558, lon: 37.6173 },
+      'Санкт-Петербург': { lat: 59.9343, lon: 30.3351 },
+      'Новосибирск': { lat: 55.0084, lon: 82.9357 },
+      'Екатеринбург': { lat: 56.8389, lon: 60.6057 },
+      'Казань': { lat: 55.8304, lon: 49.0661 }
+    };
+    
+    if (cities[city]) {
+      this.lat = cities[city].lat;
+      this.lon = cities[city].lon;
+      this.getSunTimes();
+    }
+  }
+}
+
+
+================================================================================
+FILE: ./src/app/models/index.ts
+================================================================================
+
+export * from './sleep-day.model';
+export * from './sleep-interval.model';
+
+
+
+================================================================================
+FILE: ./src/app/models/sleep-day.model.ts
+================================================================================
+import { SleepInterval } from './sleep-interval.model';
+
+export interface SleepDay {
+  date: string;           // '2024-12-25'
+  intervals: SleepInterval[];
+  quality: number;        // 1-5 звезд
+  note?: string;
+  totalDuration?: string;
+
+  caffeine?: number;      // чашки кофе
+  steps?: number;         // количество шагов
+  inertia?: number;       // сонная инерция 0-5
+}
+
+
+================================================================================
+FILE: ./src/app/models/sleep-interval.model.ts
+================================================================================
+export interface SleepInterval {
+  start: string;  // '23:30'
+  end: string;    // '07:30'
+}
+
+
+================================================================================
+FILE: ./src/app/pipes/sleep-bar.pipe.ts
+================================================================================
+// src/app/pipes/sleep-bar.pipe.ts
+import { Pipe, PipeTransform } from '@angular/core';
+import { SleepDay } from '../models/sleep-day.model';
+import { SleepInterval } from '../models/sleep-interval.model';
+
+@Pipe({
+  name: 'sleepBar',
+  standalone: true
+})
+export class SleepBarPipe implements PipeTransform {
+  transform(day: SleepDay): string {
+    if (!day.intervals || day.intervals.length === 0) {
+      return '—';
+    }
+
+    // Создаем массив из 24 часов, все false изначально
+    const hours = new Array(24).fill(false);
+    
+    // Заполняем часы, когда был сон
+    for (const interval of day.intervals) {
+      this.markSleepHours(hours, interval);
+    }
+    
+    // Преобразуем в строку с символами
+    let result = '|';
+    for (let i = 0; i < 24; i++) {
+      result += hours[i] ? '▰' : '▱';
+    }
+    result += '|';
+    
+    return result;
+  }
+
+  private markSleepHours(hours: boolean[], interval: SleepInterval): void {
+    const start = this.timeToMinutes(interval.start);
+    const end = this.timeToMinutes(interval.end);
+    
+    if (start === null || end === null) return;
+    
+    // Для интервала "00:00" - "23:59" отмечаем все часы
+    if (interval.start === '00:00' && interval.end === '23:59') {
+      for (let i = 0; i < 24; i++) hours[i] = true;
+      return;
+    }
+    
+    // Обрабатываем сон, который может переходить через полночь
+    if (end > start) {
+      // Обычный случай: сон в пределах одних суток
+      for (let minute = start; minute < end; minute++) {
+        const hour = Math.floor(minute / 60) % 24;
+        hours[hour] = true;
+      }
+    } else {
+      // Сон через полночь (например, 23:00 - 07:00)
+      // Первая часть: от start до конца суток (1440 минут)
+      for (let minute = start; minute < 1440; minute++) {
+        const hour = Math.floor(minute / 60) % 24;
+        hours[hour] = true;
+      }
+      // Вторая часть: от начала суток до end
+      for (let minute = 0; minute < end; minute++) {
+        const hour = Math.floor(minute / 60) % 24;
+        hours[hour] = true;
+      }
+    }
+  }
+
+  private timeToMinutes(time: string): number | null {
+    if (!time || time.trim() === '') return null;
+    const parts = time.split(':');
+    if (parts.length !== 2) return null;
+    
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    
+    if (isNaN(hours) || isNaN(minutes)) return null;
+    
+    // Нормализуем часы (0-23)
+    const normalizedHours = ((hours % 24) + 24) % 24;
+    return normalizedHours * 60 + minutes;
+  }
+}
+
+
+================================================================================
+FILE: ./src/app/services/sleep.service.spec.ts
+================================================================================
+import { TestBed } from '@angular/core/testing';
+import { SleepService } from './sleep.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from 'rxjs';
+import { SleepDay } from '../models/sleep-day.model';
+import { SleepInterval } from '../models/sleep-interval.model';
+
+describe('SleepService', () => {
+  let service: SleepService;
+  let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
+
+  beforeEach(() => {
+    const snackBarMock = jasmine.createSpyObj('MatSnackBar', ['open']);
+    
+    TestBed.configureTestingModule({
+      providers: [
+        SleepService,
+        { provide: MatSnackBar, useValue: snackBarMock }
+      ]
+    });
+    
+    service = TestBed.inject(SleepService);
+    snackBarSpy = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('должен создаваться', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('должен сохранять день сна', () => {
+    const day: SleepDay = {
+      date: '2024-12-27',
+      intervals: [{ start: '22:00', end: '07:00' }],
+      quality: 4
+    };
+
+    service.saveDay(day);
+    const days = service.getAllDays();
+
+    expect(days.length).toBe(2);
+    expect(snackBarSpy.open).toHaveBeenCalled();
+  });
+
+  it('должен разделять ночной сон на два дня', () => {
+    const day: SleepDay = {
+      date: '2024-12-27',
+      intervals: [{ start: '22:00', end: '07:00' }],
+      quality: 5,
+      note: 'Хороший сон'
+    };
+
+    service.saveDay(day);
+    const days = service.getAllDays();
+
+    expect(days.length).toBe(2);
+    expect(days[0].date).toBe('2024-12-28');
+    expect(days[1].date).toBe('2024-12-27');
+  });
+
+  it('должен очищать все данные', () => {
+    const day1: SleepDay = {
+      date: '2024-12-25',
+      intervals: [{ start: '22:00', end: '07:00' }],
+      quality: 4
+    };
+
+    const day2: SleepDay = {
+      date: '2024-12-26',
+      intervals: [{ start: '23:00', end: '08:00' }],
+      quality: 3
+    };
+
+    service.saveDay(day1);
+    service.saveDay(day2);
+    service.clearAll();
+
+    expect(service.getAllDays().length).toBe(0);
+  });
+
+  it('должен возвращать данные через Observable', (done) => {
+    const day: SleepDay = {
+      date: '2024-12-27',
+      intervals: [{ start: '22:00', end: '07:00' }],
+      quality: 3
+    };
+
+    let callCount = 0;
+    service.getDays().subscribe(days => {
+      callCount++;
+      // Пропускаем первый пустой вызов
+      if (callCount > 1 && days.length > 0) {
+        expect(days[0].date).toBe('2024-12-28');
+        done();
+      }
+    });
+
+    service.saveDay(day);
+  });
+
+  it('должен загружать данные из localStorage', () => {
+    const mockData: SleepDay[] = [{
+      date: '2024-11-29',
+      intervals: [{ start: '21:30', end: '06:30' }],
+      quality: 4
+    }];
+
+    localStorage.setItem('sleep_tracker_days', JSON.stringify(mockData));
+    
+    const newService = new SleepService(snackBarSpy);
+    
+    expect(newService.getAllDays().length).toBe(1);
+    expect(newService.getAllDays()[0].date).toBe('2024-11-29');
+  });
+});
+
+
+================================================================================
+FILE: ./src/app/services/sleep.service.ts
+================================================================================
+// src/app/services/sleep.service.ts
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { SleepDay, SleepInterval } from '../models';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SleepService {
+  private sleepDays: SleepDay[] = [];
+  private sleepDays$ = new BehaviorSubject<SleepDay[]>([]);
+  private readonly STORAGE_KEY = 'sleep_tracker_days';
+  
+
+  constructor(private snackBar: MatSnackBar) {
+    this.loadFromStorage();
+  }
+
+  getAllDays(): SleepDay[] {
+    return [...this.sleepDays];
+  }
+
+  getDays() {
+    return this.sleepDays$.asObservable();
+  }
+
+  saveDay(day: SleepDay): void {
+    const processedIntervals = this.splitOvernightSleep(day);
+    
+    for (const interval of processedIntervals) {
+      const targetDate = interval.date;
+      const targetDay = this.sleepDays.find(d => d.date === targetDate);
+      
+      if (targetDay) {
+        this.addIntervalToDay(targetDay, interval.interval);
+        if (targetDate === day.date){
+          targetDay.note = day.note;  
+          targetDay.quality = day.quality;
+        }
+      } else {
+        const newDay: SleepDay = {
+          date: targetDate,
+          intervals: [interval.interval],
+          quality: day.quality,
+          note: targetDate === day.date ? day.note : undefined // Примечание только к основному дню
+        };
+        this.sleepDays.push(newDay);
+      }
+    }
+    
+    this.sleepDays.sort((a, b) => b.date.localeCompare(a.date));
+    
+    this.saveToStorage();
+    this.sleepDays$.next([...this.sleepDays]);
+    this.showNotification('Запись сохранена!', 'success');
+  }
+
+  private splitOvernightSleep(day: SleepDay): Array<{date: string, interval: SleepInterval}> {
+    const result: Array<{date: string, interval: SleepInterval}> = [];
+    
+    for (const originalInterval of day.intervals) {
+      const start = this.timeToMinutes(originalInterval.start);
+      const end = this.timeToMinutes(originalInterval.end);
+      
+      if (start === null || end === null) continue;
+      
+      if (end > start) {
+        result.push({
+          date: day.date,
+          interval: originalInterval
+        });
+      } else {
+        const baseDate = new Date(day.date);
+        
+        result.push({
+          date: day.date,
+          interval: {
+            start: originalInterval.start,
+            end: '23:59'
+          }
+        });
+        
+        const nextDate = new Date(baseDate);
+        nextDate.setDate(nextDate.getDate() + 1);
+        const nextDateStr = nextDate.toISOString().split('T')[0];
+        
+        result.push({
+          date: nextDateStr,
+          interval: {
+            start: '00:00',
+            end: originalInterval.end
+          }
+        });
+      }
+    }
+    
+    return result;
+  }
+
+  private addIntervalToDay(day: SleepDay, newInterval: SleepInterval): void {
+    const newStart = this.timeToMinutes(newInterval.start);
+    const newEnd = this.timeToMinutes(newInterval.end);
+    
+    if (newStart === null || newEnd === null) return;
+    
+
+    const overlappingIndices: number[] = [];
+    
+    for (let i = 0; i < day.intervals.length; i++) {
+      const existing = day.intervals[i];
+      const existingStart = this.timeToMinutes(existing.start);
+      const existingEnd = this.timeToMinutes(existing.end);
+      
+      if (existingStart === null || existingEnd === null) continue;
+      
+
+      if (this.intervalsOverlap(newStart, newEnd, existingStart, existingEnd)) {
+        overlappingIndices.push(i);
+      }
+    }
+    
+    if (overlappingIndices.length === 0) {
+
+      day.intervals.push(newInterval);
+    } else {
+
+      const mergedIntervals = [newInterval];
+      
+      for (const index of overlappingIndices.sort((a, b) => b - a)) {
+        mergedIntervals.push(day.intervals[index]);
+        day.intervals.splice(index, 1);
+      }
+      
+
+      let minStart = newStart;
+      let maxEnd = newEnd;
+      
+      for (const interval of mergedIntervals) {
+        const start = this.timeToMinutes(interval.start);
+        const end = this.timeToMinutes(interval.end);
+        
+        if (start !== null && start < minStart) minStart = start;
+        if (end !== null && end > maxEnd) maxEnd = end;
+      }
+      
+
+      day.intervals.push({
+        start: this.minutesToTime(minStart),
+        end: this.minutesToTime(maxEnd)
+      });
+    }
+  }
+
+
+  private intervalsOverlap(start1: number, end1: number, start2: number, end2: number): boolean {
+
+    if (end1 >= start1 && end2 >= start2) {
+      return start1 < end2 && start2 < end1;
+    }
+
+    return true;
+  }
+
+  private timeToMinutes(time: string): number | null {
+    if (!time || time.trim() === '') return null;
+    const parts = time.split(':');
+    if (parts.length !== 2) return null;
+    
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    
+    if (isNaN(hours) || isNaN(minutes)) return null;
+    
+
+    const normalizedHours = ((hours % 24) + 24) % 24;
+    return normalizedHours * 60 + minutes;
+  }
+
+  private minutesToTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60) % 24;
+    const mins = minutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  }
+
+
+  upsertDay(day: SleepDay): void {
+    this.saveDay(day);
+  }
+
+  deleteDay(date: string): void {
+    this.sleepDays = this.sleepDays.filter(d => d.date !== date);
+    this.saveToStorage();
+    this.sleepDays$.next([...this.sleepDays]);
+    this.showNotification('Запись удалена!', 'success');
+  }
+
+  clearAll(): void {
+    this.sleepDays = [];
+    this.saveToStorage();
+    this.sleepDays$.next([]);
+  }
+
+  getSnapshot(): SleepDay[] {
+    return [...this.sleepDays];
+  }
+
+  private saveToStorage(): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.sleepDays));
+  }
+
+  private loadFromStorage(): void {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved) {
+      try {
+        this.sleepDays = JSON.parse(saved);
+        this.sleepDays$.next([...this.sleepDays]);
+      } catch (e) {
+        console.error('Error loading sleep data:', e);
+        this.sleepDays = [];
+      }
+    }
+  }
+  private showNotification(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+    this.snackBar.open(message, '✕', { 
+      duration: 3000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+      panelClass: ['app-theme'],
+    });
+  }
+}
+
+
+================================================================================
+FILE: ./src/app/services/storage.service.ts
+================================================================================
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class StorageService {
+
+  get<T>(key: string): T | null {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) as T : null;
+  }
+
+  set<T>(key: string, value: T): void {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  remove(key: string): void {
+    localStorage.removeItem(key);
+  }
+
+  clear(): void {
+    localStorage.clear();
+  }
+}
+
+
+================================================================================
+FILE: ./src/custom-theme.scss
+================================================================================
+/* src/custom-theme.css - если переименуешь в .css и оставишь: */
+body {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+  background-color: #fafafa; /* Светлый фон */
+  color: rgba(0, 0, 0, 0.87); /* Тёмный текст */
+}
+
+
+================================================================================
+FILE: ./src/index.html
+================================================================================
+<!-- src/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SleepTracker</title>
+  <base href="/">
+  <meta name="viewport" content="width=1200, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://unpkg.com/@angular/material@20.2.14/prebuilt-themes/pink-bluegrey-dark.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="mat-app-background">
+  <app-root></app-root>
+</body>
+</html>
+
+
+================================================================================
+FILE: ./src/main.ts
+================================================================================
+// src/main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig)
+  .catch(err => console.error(err));
+
+
+================================================================================
+FILE: ./src/styles.scss
+================================================================================
+body {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+  min-width: 1024px;
+  overflow-x: auto;
+}
+.mat-mdc-menu-panel {
+  background: rgba(30, 41, 59, 0.98) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  overflow: hidden !important;
+  min-width: 180px !important;
+}
+
+.mat-mdc-menu-content {
+  padding: 8px 0 !important;
+}
+
+.mat-mdc-menu-item {
+  color: #e2e8f0 !important;
+  font-size: 14px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  padding: 0 16px !important;
+  background: transparent !important;
+  
+  &:hover {
+    background: rgba(99, 102, 241, 0.15) !important;
+  }
+  
+  .mat-icon {
+    color: #94a3b8 !important;
+    margin-right: 12px !important;
+    font-size: 20px !important;
+    height: 20px !important;
+    width: 20px !important;
+  }
+  
+  .mdc-list-item__primary-text {
+    color: inherit !important;
+  }
+}
+
+.mat-mdc-menu-item[disabled] {
+  color: #64748b !important;
+  opacity: 0.5 !important;
+  
+  .mat-icon {
+    color: #64748b !important;
+  }
+}
+// Стили для Snackbar в теме приложения
+.mat-mdc-snack-bar-container.app-theme {
+  --mdc-snackbar-container-color: rgba(30, 41, 59, 0.98) !important;
+  --mdc-snackbar-supporting-text-color: #e2e8f0 !important;
+  --mat-snack-bar-button-color: #8b5cf6 !important;
+  
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  padding: 0 !important;
+  margin: 12px !important;
+}
+
+.app-theme .mdc-snackbar__surface {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  min-width: 300px !important;
+}
+
+.app-theme .mat-mdc-snack-bar-label {
+  color: #e2e8f0 !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  padding: 16px 20px !important;
+}
+
+// КЛЮЧЕВОЕ: стили для кнопки закрытия как у ваших кнопок
+.app-theme .mdc-button {
+  color: #8b5cf6 !important;
+  background: transparent !important; /* Прозрачный фон по умолчанию */
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease !important; /* Только фон */
+  margin: 8px 12px !important;
+  min-width: 60px !important;
+  padding: 6px 12px !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 20px !important;
+  border: none !important; /* Убираем границу */
+  box-shadow: none !important; /* Убираем тень */
+  
+  /* Убираем все стандартные эффекты Material */
+  &::before, &::after {
+    display: none !important;
+  }
+  
+  &:hover, &:focus {
+    background: rgba(139, 92, 246, 0.15) !important; /* ТОЛЬКО фон меняется */
+    color: #8b5cf6 !important; /* Цвет текста не меняется */
+    transform: none !important; /* Нет смещения */
+    box-shadow: none !important; /* Нет тени */
+  }
+  
+  &:active {
+    background: rgba(139, 92, 246, 0.2) !important; /* Чуть темнее при клике */
+  }
+}
+
+.app-theme .mdc-button__label {
+  color: inherit !important;
+}
+.mdc-snackbar__actions .mdc-button {
+  &::before, &::after {
+    background-color: transparent !important;
+  }
+  
+  .mdc-button__ripple::before, .mdc-button__ripple::after {
+    background-color: transparent !important;
+  }
+  
+  &:hover .mdc-button__ripple::before {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+  }
+}
+
+
+================================================================================
+FILE: ./src/test.ts
+================================================================================
+import 'zone.js';
+import 'zone.js/testing';
+
+

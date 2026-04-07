@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
+import { MatMenuModule } from '@angular/material/menu';
+
 import { SleepService } from '../../services/sleep.service';
 import { SleepDay, SleepInterval } from '../../models';
-import { MatMenuModule } from '@angular/material/menu';
 import { SleepFormComponent } from '../sleep-form/sleep-form.component';
-
+import { SleepBarPipe } from '../../pipes/sleep-bar.pipe'; 
 @Component({
   selector: 'app-sleep-log',
   standalone: true,
@@ -19,7 +20,8 @@ import { SleepFormComponent } from '../sleep-form/sleep-form.component';
     MatIconModule,
     FormsModule,
     MatMenuModule,
-    SleepFormComponent
+    SleepFormComponent,
+    SleepBarPipe
   ],
   templateUrl: './sleep-log.component.html',
   styleUrls: ['./sleep-log.component.scss']
@@ -27,6 +29,7 @@ import { SleepFormComponent } from '../sleep-form/sleep-form.component';
 export class SleepLogComponent implements OnInit {
   sleepDays: SleepDay[] = [];
   filteredDays: SleepDay[] = [];
+  
   currentMonth: number = new Date().getMonth();
   currentYear: number = new Date().getFullYear();
   
@@ -52,6 +55,10 @@ export class SleepLogComponent implements OnInit {
     });
   }
 
+  /* =======================
+      УПРАВЛЕНИЕ ФОРМОЙ
+  ======================= */
+
   openAddSleepForm(): void {
     this.showAddSleepForm = true;
   }
@@ -62,11 +69,11 @@ export class SleepLogComponent implements OnInit {
 
   onSleepSaved(): void {
     this.closeAddSleepForm();
-    this.sleepService.getDays().subscribe(days => {
-      this.sleepDays = days;
-      this.filterDaysByMonth();
-    });
   }
+
+  /* =======================
+      ФИЛЬТРАЦИЯ И НАВИГАЦИЯ
+  ======================= */
 
   get currentMonthName(): string {
     return this.monthNames[this.currentMonth];
@@ -79,68 +86,7 @@ export class SleepLogComponent implements OnInit {
              date.getFullYear() === this.currentYear;
     });
     
-    this.filteredDays.sort((a, b) => {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    });
-  }
-
-  startEdit(index: number, day: SleepDay): void {
-    this.editingIndex = index;
-    this.editIntervals = [...day.intervals];
-    this.editQuality = day.quality || 3;
-    this.editNote = day.note || '';
-    this.originalDay = { ...day };
-  }
-
-  addEditInterval(): void {
-    this.editIntervals.push({ start: '22:00', end: '07:00' });
-  }
-
-  removeEditInterval(index: number): void {
-    if (this.editIntervals.length > 1) {
-      this.editIntervals.splice(index, 1);
-    }
-  }
-
-  canSaveEdit(): boolean {
-    return this.editIntervals.every(interval => 
-      interval.start && interval.end && 
-      interval.start.trim() !== '' && 
-      interval.end.trim() !== ''
-    ) && this.editQuality > 0;
-  }
-
-  saveEdit(): void {
-    if (!this.canSaveEdit() || this.editingIndex === -1 || !this.originalDay) return;
-
-    const validIntervals = this.editIntervals.filter(interval => 
-      interval.start && interval.end && 
-      interval.start.trim() !== '' && 
-      interval.end.trim() !== ''
-    );
-
-    const updatedDay: SleepDay = {
-      date: this.originalDay.date,
-      intervals: validIntervals,
-      quality: this.editQuality,
-      note: this.editNote.trim() || undefined
-    };
-
-    this.sleepService.saveDay(updatedDay);
-    this.cancelEdit();
-    
-    this.sleepService.getDays().subscribe(days => {
-      this.sleepDays = days;
-      this.filterDaysByMonth();
-    });
-  }
-
-  cancelEdit(): void {
-    this.editingIndex = -1;
-    this.editIntervals = [];
-    this.editQuality = 3;
-    this.editNote = '';
-    this.originalDay = null;
+    this.filteredDays.sort((a, b) => b.date.localeCompare(a.date));
   }
 
   previousMonth(): void {
@@ -165,142 +111,157 @@ export class SleepLogComponent implements OnInit {
     this.cancelEdit();
   }
 
-  getDayNumber(dateString: string): string {
-    const date = new Date(dateString);
-    return date.getDate().toString();
+  /* =======================
+      РЕДАКТИРОВАНИЕ
+  ======================= */
+
+  startEdit(index: number, day: SleepDay): void {
+    this.editingIndex = index;
+    this.editIntervals = JSON.parse(JSON.stringify(day.intervals));
+    this.editQuality = day.quality || 3;
+    this.editNote = day.note || '';
+    this.originalDay = { ...day };
   }
 
-  getDayOfWeek(dateString: string): string {
-    const date = new Date(dateString);
-    const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
-    return days[date.getDay()];
+  cancelEdit(): void {
+    this.editingIndex = -1;
+    this.editIntervals = [];
+    this.editQuality = 3;
+    this.editNote = '';
+    this.originalDay = null;
   }
 
+  saveEdit(): void {
+    if (!this.canSaveEdit() || this.editingIndex === -1 || !this.originalDay) return;
+
+    const updatedDay: SleepDay = {
+      date: this.originalDay.date,
+      intervals: this.editIntervals.filter(i => i.start && i.end),
+      quality: this.editQuality,
+      note: this.editNote.trim() || undefined
+    };
+
+    this.sleepService.deleteDay(this.originalDay.date);
+    this.sleepService.saveDay(updatedDay);
+    
+    this.cancelEdit();
+  }
+
+  canSaveEdit(): boolean {
+    return this.editIntervals.some(i => i.start && i.end) && this.editQuality > 0;
+  }
+
+  addEditInterval(): void {
+    this.editIntervals.push({ start: '', end: '' });
+  }
+
+  removeEditInterval(index: number): void {
+    if (this.editIntervals.length > 1) {
+      this.editIntervals.splice(index, 1);
+    }
+  }
+
+  deleteDay(date: string): void {
+    if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+      this.sleepService.deleteDay(date);
+      if (this.editingIndex !== -1 && this.originalDay?.date === date) {
+        this.cancelEdit();
+      }
+    }
+  }
+
+  /* =======================
+      РАСЧЕТЫ И ОТОБРАЖЕНИЕ
+  ======================= */
+
+  /**
+   * Суммирует время сна строго за ОДИН календарный день.
+   * Т.к. сервис уже разделил интервалы, нам не нужно искать "хвосты" в соседних днях.
+   */
   getCombinedSleepTime(dateStr: string): string {
-    const date = new Date(dateStr);
-    
-    const currentDay = this.sleepDays.find(d => d.date === dateStr);
+    const day = this.sleepDays.find(d => d.date === dateStr);
+    if (!day || !day.intervals) return '';
+
     let totalMinutes = 0;
-    
-    if (currentDay && currentDay.intervals) {
-      currentDay.intervals.forEach(interval => {
-        const start = this.timeToMinutes(interval.start);
-        const end = this.timeToMinutes(interval.end);
-        
-        if (start !== null && end !== null) {
-          if (end < start) {
-            totalMinutes += (1440 - start) + end;
-          } else {
-            totalMinutes += (end - start);
-          }
-        }
-      });
-    }
-    
-    const prevDate = new Date(date);
-    prevDate.setDate(prevDate.getDate() - 1);
-    const prevDateStr = prevDate.toISOString().split('T')[0];
-    
-    const prevDay = this.sleepDays.find(d => d.date === prevDateStr);
-    if (prevDay && prevDay.intervals) {
-      prevDay.intervals.forEach(interval => {
-        const start = this.timeToMinutes(interval.start);
-        const end = this.timeToMinutes(interval.end);
-        
-        if (start !== null && end !== null && end < start) {
-          totalMinutes += end;
-        }
-      });
-    }
-    
-    if (totalMinutes === 0) return '';
-    
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    
-    if (hours === 0) return `${minutes}м`;
-    if (minutes === 0) return `${hours}ч`;
-    return `${hours}ч ${minutes}м`;
+    day.intervals.forEach(interval => {
+      const start = this.timeToMinutes(interval.start);
+      let end = this.timeToMinutes(interval.end);
+      
+      if (start !== null && end !== null) {
+        if (interval.end === '23:59') end = 1440;
+        totalMinutes += (end - start);
+      }
+    });
+
+    return this.formatMinutes(totalMinutes);
   }
+
+  calculateDuration(interval: SleepInterval): string {
+    const start = this.timeToMinutes(interval.start);
+    let end = this.timeToMinutes(interval.end);
+    if (start === null || end === null) return '';
+
+    if (interval.end === '23:59') end = 1440;
+    
+    const diff = end - start;
+    return this.formatMinutes(diff);
+  }
+
+  /* =======================
+      СТАТИСТИКА
+  ======================= */
 
   get avgQuality(): number {
     if (this.filteredDays.length === 0) return 0;
-    const sum = this.filteredDays.reduce((total: number, day: SleepDay) => total + (day.quality || 0), 0);
+    const sum = this.filteredDays.reduce((total, day) => total + (day.quality || 0), 0);
     return sum / this.filteredDays.length;
   }
 
   get avgSleepHours(): number {
     if (this.filteredDays.length === 0) return 0;
     
-    const totalMinutes = this.filteredDays.reduce((total: number, day: SleepDay) => {
-      if (!day.intervals || day.intervals.length === 0) return total;
-      
-      const dayMinutes = day.intervals.reduce((dayTotal: number, interval: SleepInterval) => {
-        const start = this.timeToMinutes(interval.start);
-        const end = this.timeToMinutes(interval.end);
-        
-        if (start === null || end === null) return dayTotal;
-        
-        if (end < start) {
-          return dayTotal + ((1440 - start) + end);
-        } else {
-          return dayTotal + (end - start);
+    const totalMinutes = this.filteredDays.reduce((total, day) => {
+      let dayMin = 0;
+      day.intervals.forEach(i => {
+        const s = this.timeToMinutes(i.start);
+        let e = this.timeToMinutes(i.end);
+        if (s !== null && e !== null) {
+          if (i.end === '23:59') e = 1440;
+          dayMin += (e - s);
         }
-      }, 0);
-      
-      return total + dayMinutes;
+      });
+      return total + dayMin;
     }, 0);
     
     return totalMinutes / (this.filteredDays.length * 60);
   }
 
+  /* =======================
+      ВСПОМОГАТЕЛЬНЫЕ
+  ======================= */
+
   private timeToMinutes(time: string): number | null {
-    if (!time || time.trim() === '') return null;
-    const parts = time.split(':');
-    if (parts.length !== 2) return null;
-    
-    const hours = parseInt(parts[0], 10);
-    const minutes = parseInt(parts[1], 10);
-    
-    if (isNaN(hours) || isNaN(minutes)) return null;
-    
-    const normalizedHours = ((hours % 24) + 24) % 24;
-    return normalizedHours * 60 + minutes;
+    if (!time) return null;
+    const [h, m] = time.split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
   }
 
-  deleteDay(date: string): void {
-    if (confirm('Вы уверены, что хотите удалить эту запись?')) {
-      this.sleepService.deleteDay(date);
-      
-      if (this.editingIndex !== -1 && this.originalDay?.date === date) {
-        this.cancelEdit();
-      }
-    }
+  private formatMinutes(totalMinutes: number): string {
+    if (totalMinutes <= 0) return '';
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    if (h === 0) return `${m}м`;
+    if (m === 0) return `${h}ч`;
+    return `${h}ч ${m}м`;
   }
-  
-  calculateDuration(interval: SleepInterval): string {
-    const start = this.timeToMinutes(interval.start);
-    const end = this.timeToMinutes(interval.end);
-    
-    if (start === null || end === null) return '';
-    
-    let durationMinutes: number;
-    
-    if (end < start) {
-      durationMinutes = (1440 - start) + end;
-    } else {
-      durationMinutes = end - start;
-    }
-    
-    const hours = Math.floor(durationMinutes / 60);
-    const minutes = durationMinutes % 60;
-    
-    if (hours === 0) {
-      return `${minutes}м`;
-    } else if (minutes === 0) {
-      return `${hours}ч`;
-    } else {
-      return `${hours}ч ${minutes}м`;
-    }
+
+  getDayNumber(dateString: string): string {
+    return new Date(dateString).getDate().toString();
+  }
+
+  getDayOfWeek(dateString: string): string {
+    const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    return days[new Date(dateString).getDay()];
   }
 }

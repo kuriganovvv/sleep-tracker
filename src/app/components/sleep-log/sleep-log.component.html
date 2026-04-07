@@ -77,6 +77,9 @@
                 <span class="sleep-time">
                   {{ getCombinedSleepTime(day.date) }}
                 </span>
+                <div class="sleep-bar-wrapper">
+                  <div class="sleep-bar" [innerHTML]="day | sleepBar"></div>
+                </div>
               </div>
             </div>
             

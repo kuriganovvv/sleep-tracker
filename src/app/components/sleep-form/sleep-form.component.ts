@@ -55,12 +55,11 @@ export class SleepFormComponent implements OnInit {
   constructor(private sleepService: SleepService) {}
 
   ngOnInit(): void {
-    this.selectDate('today');
     this.calculateTotalSleep();
   }
 
   /* =======================
-     ДАТА
+      ВЫБОР ДАТЫ
   ======================= */
 
   selectDate(type: 'today' | 'yesterday'): void {
@@ -88,7 +87,7 @@ export class SleepFormComponent implements OnInit {
   }
 
   /* =======================
-     ИНТЕРВАЛЫ
+      УПРАВЛЕНИЕ ИНТЕРВАЛАМИ
   ======================= */
 
   addInterval(): void {
@@ -103,8 +102,33 @@ export class SleepFormComponent implements OnInit {
   }
 
   /* =======================
-     РАСЧЁТ ВРЕМЕНИ
+      РАСЧЁТЫ ВРЕМЕНИ
   ======================= */
+
+  calculateTotalSleep(): void {
+    let totalMinutes = 0;
+    
+    for (const interval of this.intervals) {
+      const duration = this.getIntervalMinutes(interval);
+      totalMinutes += duration;
+    }
+    
+    if (totalMinutes === 0) {
+      this.totalSleep = '';
+      return;
+    }
+    
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (hours === 0) {
+      this.totalSleep = `${minutes}м`;
+    } else if (minutes === 0) {
+      this.totalSleep = `${hours}ч`;
+    } else {
+      this.totalSleep = `${hours}ч ${minutes}м`;
+    }
+  }
 
   getIntervalDuration(interval: SleepInterval): string {
     const minutes = this.getIntervalMinutes(interval);
@@ -118,45 +142,6 @@ export class SleepFormComponent implements OnInit {
     return `${h}ч ${m}м`;
   }
 
-  calculateTotalSleep(): void {
-    if (this.intervals.length === 0) {
-      this.totalSleep = '';
-      return;
-    }
-    
-    let totalMinutes = 0;
-    
-    for (const interval of this.intervals) {
-      if (!interval.start || !interval.end) continue;
-      
-      const start = this.timeToMinutes(interval.start);
-      const end = this.timeToMinutes(interval.end);
-      
-      if (start === null || end === null) continue;
-      
-      let duration = end - start;
-      if (duration < 0) duration += 24 * 60; // сон через полночь
-      totalMinutes += duration;
-    }
-    
-    if (totalMinutes === 0) {
-      this.totalSleep = '';
-      return;
-    }
-    
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    
-    // 👇 Сохраняем в формате, который будем показывать в таблице
-    if (hours === 0) {
-      this.totalSleep = `${minutes}м`;
-    } else if (minutes === 0) {
-      this.totalSleep = `${hours}ч`;
-    } else {
-      this.totalSleep = `${hours}ч ${minutes}м`;
-    }
-  }
-
   private getIntervalMinutes(interval: SleepInterval): number {
     if (!interval.start || !interval.end) return 0;
 
@@ -165,93 +150,81 @@ export class SleepFormComponent implements OnInit {
     if (start === null || end === null) return 0;
 
     let duration = end - start;
-    if (duration < 0) duration += 1440; // через полночь
+    if (duration < 0) duration += 1440; 
 
     return duration;
   }
 
   private timeToMinutes(time: string): number | null {
-    const [h, m] = time.split(':').map(Number);
-    if (isNaN(h) || isNaN(m)) return null;
-    return h * 60 + m;
+    if (!time) return null;
+    const parts = time.split(':').map(Number);
+    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return null;
+    return parts[0] * 60 + parts[1];
   }
 
   /* =======================
-     КЛЮЧЕВОЕ — РАЗБИЕНИЕ
-  ======================= */
-
-  private splitIntervalByMidnight(
-    date: string,
-    interval: SleepInterval
-  ): { date: string; start: string; end: string }[] {
-
-    const startMin = this.timeToMinutes(interval.start);
-    const endMin = this.timeToMinutes(interval.end);
-
-    if (startMin === null || endMin === null) return [];
-
-    // не через полночь
-    if (endMin > startMin) {
-      return [{ date, start: interval.start, end: interval.end }];
-    }
-
-    // через полночь
-    const current = new Date(date);
-    const prev = new Date(current);
-    prev.setDate(prev.getDate() - 1);
-
-    return [
-      {
-        date: prev.toISOString().split('T')[0],
-        start: interval.start,
-        end: '23:59'
-      },
-      {
-        date,
-        start: '00:00',
-        end: interval.end
-      }
-    ];
-  }
-
-  /* =======================
-     СОХРАНЕНИЕ
+      СОХРАНЕНИЕ С РАЗБИЕНИЕМ
   ======================= */
 
   canSave(): boolean {
     return this.intervals.some(i => i.start && i.end) && this.quality > 0;
   }
 
-  private getNightStartDate(): string {
-    const wakeUp = new Date(this.selectedDateValue);
-    wakeUp.setDate(wakeUp.getDate() - 1);
-    return wakeUp.toISOString().split('T')[0];
-  }
-
   saveSleep(): void {
     if (!this.canSave()) return;
 
-    // Фильтруем пустые промежутки
-    const validIntervals = this.intervals.filter(interval => 
-      interval.start && interval.end && 
-      interval.start.trim() !== '' && 
-      interval.end.trim() !== ''
-    );
+    const baseDate = this.selectedDateValue;
+    const validIntervals = this.intervals.filter(i => i.start && i.end);
 
-    // 👇 ВАЖНО: Сохраняем общее время сна, которое уже рассчитано
-    const sleepDay: SleepDay = {
-      date: this.selectedDateValue,
-      intervals: validIntervals,
-      quality: this.quality,
-      note: this.note.trim() || undefined,
-      totalDuration: this.totalSleep // 👈 Сохраняем рассчитанное общее время
-    };
+    validIntervals.forEach(interval => {
+      const segments = this.splitIntervalByMidnight(baseDate, interval);
 
-    this.sleepService.saveDay(sleepDay);
+      segments.forEach(segment => {
+        const sleepDay: SleepDay = {
+          date: segment.date,
+          intervals: [{ start: segment.start, end: segment.end }],
+          quality: this.quality,
+          note: segment.date === baseDate ? this.note.trim() : undefined
+        };
+        this.sleepService.saveDay(sleepDay);
+      });
+    });
+
     this.clearForm();
     this.saved.emit();
   }
 
+  private splitIntervalByMidnight(date: string, interval: SleepInterval) {
+    const startMin = this.timeToMinutes(interval.start);
+    const endMin = this.timeToMinutes(interval.end);
+
+    if (startMin === null || endMin === null) return [];
+
+    if (endMin < startMin) {
+      const current = new Date(date);
+      const prev = new Date(current);
+      prev.setDate(prev.getDate() - 1);
+
+      return [
+        {
+          date: prev.toISOString().split('T')[0],
+          start: interval.start,
+          end: '23:59'
+        },
+        {
+          date: date,
+          start: '00:00',
+          end: interval.end
+        }
+      ];
+    }
+
+    return [{ date, start: interval.start, end: interval.end }];
+  }
+
+  /* =======================
+      ВСПОМОГАТЕЛЬНЫЕ
+  ======================= */
 
   cancelForm(): void {
     this.clearForm();
@@ -272,37 +245,22 @@ export class SleepFormComponent implements OnInit {
   getQualityText(): string {
     return this.qualityTexts[this.quality - 1] || '';
   }
+
   getDisplayDateWithCorrectNight(): string {
     const date = new Date(this.selectedDateValue);
-
     const hasOvernightSleep = this.intervals.some(interval => {
-      if (!interval.start || !interval.end) return false;
-
       const start = this.timeToMinutes(interval.start);
       const end = this.timeToMinutes(interval.end);
-
       return start !== null && end !== null && end < start;
     });
 
-    // Если сон через полночь — показываем диапазон дат
     if (hasOvernightSleep) {
       const prevDate = new Date(date);
       prevDate.setDate(prevDate.getDate() - 1);
-
-      const prev = prevDate.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long'
-      });
-
-      const curr = date.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long'
-      });
-
-      return `${prev} – ${curr}`;
+      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' };
+      return `${prevDate.toLocaleDateString('ru-RU', options)} – ${date.toLocaleDateString('ru-RU', options)}`;
     }
 
-    // Обычный случай
     return date.toLocaleDateString('ru-RU', {
       weekday: 'long',
       year: 'numeric',
